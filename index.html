@@ -536,7 +536,7 @@ function renderLockArea(){
     const g = findGroup(pendingClaimTakeoverGroupId);
     wrap.innerHTML = `
       <div class="lock-panel">
-        <p><strong>${escapeHtml(g.name)}</strong> is already being scored on another device. To stop two phones from overwriting each other's entries, taking it over here needs the admin PIN.</p>
+        <p><strong>${escapeHtml(g.name)}</strong> is already claimed on another device. Ask the tournament admin for the admin PIN to take it over here.</p>
         <div class="new-group-row">
           <input type="password" inputmode="numeric" id="claimTakeoverPin" placeholder="Admin PIN" style="width:140px;">
           <button id="claimTakeoverConfirmBtn">Take over</button>
@@ -883,7 +883,7 @@ function renderAdminGroupList(){
            <button class="save-group-edit" data-gid="${g.id}">Save</button>
            <button class="cancel-group-edit">Cancel</button>
          </div>`
-      : `<div class="gn">${escapeHtml(g.name)} <button class="edit-group" data-gid="${g.id}" style="background:none;border:none;color:#888;font-size:0.7rem;cursor:pointer;text-decoration:underline;">Edit</button><small>${g.startHole ? 'Starts hole '+g.startHole : 'Start hole not set yet'}${g.claimedByDevice ? ' · 🔒 claimed on a device' : ' · unclaimed'}</small></div>`;
+      : `<div class="gn">${escapeHtml(g.name)} <button class="edit-group" data-gid="${g.id}" style="background:none;border:none;color:#888;font-size:0.7rem;cursor:pointer;text-decoration:underline;">Edit</button><small>${g.startHole ? 'Starts hole '+g.startHole : 'Start hole not set yet'}${g.claimedByDevice ? ' · 🔒 claimed' : ' · unclaimed'}</small></div>`;
 
     return `<div class="group-block">
       <div class="group-block-head">
