@@ -484,11 +484,86 @@ function renderLeaderboard(){
 
 /* ---------- Log Score: pick pre-made group, shotgun start, one hole at a time for the whole group ---------- */
 let pendingStartHoleGroupId = null;
+let pendingClaimTakeoverGroupId = null; // set when a device tries to pick a group another device already claimed
 let holeDrafts = {}; // playerId -> in-progress score for the hole currently on screen, before Save
+
+const LS_DEVICE_ID_KEY = 'familyCupDeviceId';
+function getDeviceId(){
+  try{
+    let id = localStorage.getItem(LS_DEVICE_ID_KEY);
+    if(!id){ id = uid() + uid(); localStorage.setItem(LS_DEVICE_ID_KEY, id); }
+    return id;
+  }catch(e){ return 'anon-' + Math.random(); }
+}
+
+function claimGroup(g){
+  g.claimedByDevice = getDeviceId();
+  g.claimedAt = new Date().toISOString();
+}
+
+function enterGroup(g){
+  if(!g.startHole){
+    if(state.startMode === 'standard'){
+      g.startHole = state.standardStartHole || 1;
+      g.currentPos = 0;
+      unlockedGroupId = g.id;
+      holeDrafts = {};
+      editingHolePos = null;
+      try{ localStorage.setItem(LS_GROUP_KEY, g.id); }catch(e){ /* private browsing etc. — fine, just won't persist */ }
+      saveSoon();
+      renderLog();
+      return;
+    }
+    pendingStartHoleGroupId = g.id;
+    saveSoon();
+    renderLog();
+    return;
+  }
+  if(typeof g.currentPos !== 'number') g.currentPos = groupPos(g);
+  unlockedGroupId = g.id;
+  holeDrafts = {};
+  editingHolePos = null;
+  try{ localStorage.setItem(LS_GROUP_KEY, g.id); }catch(e){ /* private browsing etc. — fine, just won't persist */ }
+  saveSoon();
+  renderLog();
+}
 
 function renderLockArea(){
   const wrap = document.getElementById('lockArea');
   if(unlockedGroupId && findGroup(unlockedGroupId)){ wrap.innerHTML=''; return; }
+
+  if(pendingClaimTakeoverGroupId && findGroup(pendingClaimTakeoverGroupId)){
+    const g = findGroup(pendingClaimTakeoverGroupId);
+    wrap.innerHTML = `
+      <div class="lock-panel">
+        <p><strong>${escapeHtml(g.name)}</strong> is already being scored on another device. To stop two phones from overwriting each other's entries, taking it over here needs the admin PIN.</p>
+        <div class="new-group-row">
+          <input type="password" inputmode="numeric" id="claimTakeoverPin" placeholder="Admin PIN" style="width:140px;">
+          <button id="claimTakeoverConfirmBtn">Take over</button>
+        </div>
+        <div id="claimTakeoverError" style="color:var(--red);font-size:0.75rem;margin-top:8px;"></div>
+        <button id="claimTakeoverCancelBtn" style="background:none;color:#888;text-decoration:underline;border:none;cursor:pointer;font-size:0.78rem;margin-top:10px;">Cancel, pick a different group</button>
+      </div>`;
+    document.getElementById('claimTakeoverPin').focus();
+    const attempt = ()=>{
+      const pin = document.getElementById('claimTakeoverPin').value.trim();
+      if(!state.adminPin){
+        document.getElementById('claimTakeoverError').textContent = 'No admin PIN is set — ask the tournament admin to set one first.';
+        return;
+      }
+      if(pin !== state.adminPin){
+        document.getElementById('claimTakeoverError').textContent = 'Wrong PIN.';
+        return;
+      }
+      pendingClaimTakeoverGroupId = null;
+      claimGroup(g);
+      enterGroup(g);
+    };
+    document.getElementById('claimTakeoverConfirmBtn').addEventListener('click', attempt);
+    document.getElementById('claimTakeoverPin').addEventListener('keydown', e=>{ if(e.key==='Enter') attempt(); });
+    document.getElementById('claimTakeoverCancelBtn').addEventListener('click', ()=>{ pendingClaimTakeoverGroupId=null; renderLog(); });
+    return;
+  }
 
   if(pendingStartHoleGroupId && findGroup(pendingStartHoleGroupId)){
     const g = findGroup(pendingStartHoleGroupId);
@@ -525,38 +600,25 @@ function renderLockArea(){
 
   let picks = state.groups.map(g => {
     const roster = g.players.map(p=>p.name).join(', ') || 'No players yet';
-    return `<button data-id="${g.id}"><span class="gpick-name">${escapeHtml(g.name)}</span><span class="gpick-roster">${escapeHtml(roster)}</span></button>`;
+    const takenBadge = (g.claimedByDevice && g.claimedByDevice !== getDeviceId()) ? ' 🔒' : '';
+    return `<button data-id="${g.id}"><span class="gpick-name">${escapeHtml(g.name)}${takenBadge}</span><span class="gpick-roster">${escapeHtml(roster)}</span></button>`;
   }).join('');
   wrap.innerHTML = `
     <div class="lock-panel">
-      <p>Pick your group to log strokes for it. Groups and players are set up ahead of time in Admin — if your group isn't listed, ask whoever set up the tournament to add it.</p>
+      <p>Pick your group to log strokes for it. Groups and players are set up ahead of time in Admin — if your group isn't listed, ask whoever set up the tournament to add it. A 🔒 means another device already claimed that group.</p>
       <div class="group-pick">${picks || '<span style="font-size:0.82rem;color:#888;">No groups set up yet — check the Admin tab.</span>'}</div>
     </div>`;
   wrap.querySelectorAll('.group-pick button').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const g = findGroup(btn.dataset.id);
-      if(!g.startHole){
-        if(state.startMode === 'standard'){
-          g.startHole = state.standardStartHole || 1;
-          g.currentPos = 0;
-          unlockedGroupId = g.id;
-          holeDrafts = {};
-          editingHolePos = null;
-          try{ localStorage.setItem(LS_GROUP_KEY, g.id); }catch(e){ /* private browsing etc. — fine, just won't persist */ }
-          saveSoon();
-          renderLog();
-          return;
-        }
-        pendingStartHoleGroupId = g.id;
+      const myId = getDeviceId();
+      if(g.claimedByDevice && g.claimedByDevice !== myId){
+        pendingClaimTakeoverGroupId = g.id;
         renderLog();
         return;
       }
-      if(typeof g.currentPos !== 'number') g.currentPos = groupPos(g);
-      unlockedGroupId = g.id;
-      holeDrafts = {};
-      editingHolePos = null;
-      try{ localStorage.setItem(LS_GROUP_KEY, g.id); }catch(e){ /* private browsing etc. — fine, just won't persist */ }
-      renderLog();
+      claimGroup(g);
+      enterGroup(g);
     });
   });
 }
@@ -597,6 +659,8 @@ function renderLog(){
         document.getElementById('switchAdminError').textContent = 'Wrong PIN.';
         return;
       }
+      const releasing = unlockedGroupId ? findGroup(unlockedGroupId) : null;
+      if(releasing && releasing.claimedByDevice === getDeviceId()){ releasing.claimedByDevice = null; releasing.claimedAt = null; saveSoon(); }
       pendingSwitchOut = false;
       unlockedGroupId = null; holeDrafts = {}; editingHolePos = null;
       try{ localStorage.removeItem(LS_GROUP_KEY); }catch(e){}
@@ -606,6 +670,19 @@ function renderLog(){
     document.getElementById('switchAdminPin').addEventListener('keydown', e=>{ if(e.key==='Enter') doConfirmSwitch(); });
     document.getElementById('cancelSwitchBtn').addEventListener('click', ()=>{ pendingSwitchOut=false; renderLog(); });
     return;
+  }
+
+  // If our claim on this group was reset or handed to another device (e.g. an
+  // admin "Clear scores"/"Clear everything", or a takeover elsewhere), drop
+  // back to the picker instead of silently continuing to log for a group we
+  // no longer actually hold — this is what keeps two devices from ending up
+  // on the same group at once.
+  if(unlockedGroupId){
+    const current = findGroup(unlockedGroupId);
+    if(!current || current.claimedByDevice !== getDeviceId()){
+      unlockedGroupId = null; holeDrafts = {}; editingHolePos = null;
+      try{ localStorage.removeItem(LS_GROUP_KEY); }catch(e){}
+    }
   }
 
   const g = unlockedGroupId ? findGroup(unlockedGroupId) : null;
@@ -623,6 +700,7 @@ function renderLog(){
       renderLog();
       return;
     }
+    if(g.claimedByDevice === getDeviceId()){ g.claimedByDevice = null; g.claimedAt = null; saveSoon(); }
     unlockedGroupId=null; holeDrafts={}; editingHolePos=null;
     try{ localStorage.removeItem(LS_GROUP_KEY); }catch(e){}
     renderLog();
@@ -805,12 +883,15 @@ function renderAdminGroupList(){
            <button class="save-group-edit" data-gid="${g.id}">Save</button>
            <button class="cancel-group-edit">Cancel</button>
          </div>`
-      : `<div class="gn">${escapeHtml(g.name)} <button class="edit-group" data-gid="${g.id}" style="background:none;border:none;color:#888;font-size:0.7rem;cursor:pointer;text-decoration:underline;">Edit</button><small>${g.startHole ? 'Starts hole '+g.startHole : 'Start hole not set yet'}</small></div>`;
+      : `<div class="gn">${escapeHtml(g.name)} <button class="edit-group" data-gid="${g.id}" style="background:none;border:none;color:#888;font-size:0.7rem;cursor:pointer;text-decoration:underline;">Edit</button><small>${g.startHole ? 'Starts hole '+g.startHole : 'Start hole not set yet'}${g.claimedByDevice ? ' · 🔒 claimed on a device' : ' · unclaimed'}</small></div>`;
 
     return `<div class="group-block">
       <div class="group-block-head">
         ${headName}
-        <button class="del-group" data-gid="${g.id}">Remove group</button>
+        <span style="display:flex;gap:6px;">
+          ${g.claimedByDevice ? `<button class="release-claim" data-gid="${g.id}" style="background:none;border:1px solid var(--grid);color:#555;border-radius:6px;padding:5px 9px;font-size:0.66rem;cursor:pointer;">Release claim</button>` : ''}
+          <button class="del-group" data-gid="${g.id}">Remove group</button>
+        </span>
       </div>
       ${rows}
       <div class="add-row" style="margin-top:8px;">
@@ -820,6 +901,14 @@ function renderAdminGroupList(){
       </div>
     </div>`;
   }).join('');
+
+  wrap.querySelectorAll('.release-claim').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const g = findGroup(btn.dataset.gid);
+      g.claimedByDevice = null; g.claimedAt = null;
+      saveSoon(); renderAll();
+    });
+  });
 
   wrap.querySelectorAll('.del-player').forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -991,6 +1080,8 @@ function renderSessionControls(){
     state.groups.forEach(g=>{
       g.currentPos = 0;
       g.startHole = null;
+      g.claimedByDevice = null;
+      g.claimedAt = null;
       g.players.forEach(p=>{ p.scores = Array(18).fill(null); });
     });
     forgetDeviceState();
