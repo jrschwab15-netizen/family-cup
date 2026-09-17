@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>Leaders</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --cream:#f4f2ea; --white:#ffffff; --ink:#141414;
+    --red:#c8102e; --grid:#c9c7bd; --rowalt:#ebe9df;
+    --sky-top:#8fc6ee; --sky-bottom:#e4f1fb; --grass:#2f6b3c; --over:#1b3350; --under-green:#1e8a3c;
+    --sans:'Arial Black','Helvetica Neue',Arial,sans-serif;
+    --sans-reg:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+    --mono:'Courier New',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;font-family:var(--sans-reg);color:var(--ink);}
+  body{
+    background:linear-gradient(var(--sky-top), var(--sky-bottom) 120px, var(--cream) 120px, var(--cream) calc(100% - 10px), var(--grass) calc(100% - 10px));
+    background-attachment:fixed; min-height:100vh;
+    padding:0 0 calc(78px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:18px 12px 0;}
+  .view{display:none;} .view.active{display:block;}
+
+  .arch{background:var(--white);border-radius:50% 50% 0 0 / 90px 90px 0 0;height:78px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,0.18);}
+  .arch h1{font-family:var(--sans);font-weight:900;font-size:1.9rem;letter-spacing:2px;margin:0;}
+  .subplaque{background:var(--white);border-top:2px solid var(--grid);padding:8px 16px 10px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 3px 8px rgba(0,0,0,0.1);margin-bottom:16px;border-radius:0 0 6px 6px;}
+  .subplaque input.tname{background:transparent;border:none;color:var(--ink);font-family:var(--sans);font-weight:900;font-size:0.95rem;letter-spacing:0.5px;text-transform:uppercase;outline:none;width:100%;border-bottom:1px dashed transparent;}
+  .subplaque input.tname:focus{border-bottom:1px dashed var(--red);}
+  .subplaque .sub{font-size:0.58rem;color:#777;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;font-weight:700;}
+  .subplaque .sub.err{color:var(--red);}
+
+  .grid-scroll{overflow-x:auto;background:var(--white);border:1px solid var(--grid);border-radius:8px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+  table.leader-table{border-collapse:collapse;width:100%;}
+  table.leader-table th, table.leader-table td{border:1px solid var(--grid);text-align:center;padding:6px 4px;font-size:0.78rem;white-space:nowrap;}
+  table.leader-table thead th{background:var(--white);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.5px;color:#555;font-weight:800;}
+  .stacked{writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.55rem !important;letter-spacing:1px;padding:6px 3px !important;}
+  th.rank-col, td.rank-col{position:sticky;left:0;z-index:2;min-width:34px;}
+  th.player-col, td.player-col{position:sticky;left:34px;z-index:2;text-align:left;min-width:118px;max-width:118px;overflow:hidden;text-overflow:ellipsis;}
+  td.rank-col, td.player-col{background:var(--white);}
+  tbody tr:nth-child(even) td.rank-col, tbody tr:nth-child(even) td.player-col{background:var(--rowalt);}
+  th.rank-col, th.player-col{background:var(--white);}
+  td.rank-col{color:var(--red);font-weight:900;font-size:0.9rem;}
+  td.player-col .pn{font-weight:800;text-transform:uppercase;font-size:0.78rem;}
+  td.player-col .gtag{display:block;font-size:0.52rem;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;}
+  tbody tr:nth-child(even) td{background:var(--rowalt);}
+  td.score-cell{font-family:var(--mono);font-weight:700;font-size:0.85rem;}
+  td.score-cell.under{color:var(--under-green);}
+  td.score-cell.even{color:var(--ink);}
+  td.score-cell.over{color:var(--red);}
+  td.score-cell.empty{color:transparent;}
+  th.hole9end, td.hole9end{border-right:3px solid var(--ink);}
+  th.par-label, td.par-label-row{font-weight:800;font-size:0.6rem;color:#555;}
+  td.thru-col{font-family:var(--mono);font-weight:700;font-size:0.8rem;color:#333;}
+  td.total-col{font-family:var(--mono);font-weight:800;font-size:0.85rem;color:var(--ink);}
+  td.net-col{font-family:var(--mono);font-weight:900;font-size:0.9rem;}
+  td.net-col.under{color:var(--under-green);} td.net-col.even{color:var(--ink);} td.net-col.over{color:var(--red);}
+  .empty-board{padding:26px 16px;text-align:center;color:#777;font-size:0.9rem;background:var(--white);border-radius:8px;border:1px solid var(--grid);margin-bottom:16px;}
+  .sync-note{text-align:center;font-size:0.65rem;color:#777;margin:6px 0 20px;line-height:1.5;}
+
+  .section-title{font-size:0.68rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--red);margin:0 0 8px 2px;font-weight:800;}
+  .card{background:var(--white);border:1px solid var(--grid);border-radius:10px;padding:14px;margin-bottom:18px;box-shadow:0 2px 6px rgba(0,0,0,0.06);}
+
+  .lock-panel{background:var(--white);border:1px solid var(--grid);border-radius:12px;padding:18px 16px;margin-bottom:18px;box-shadow:0 2px 6px rgba(0,0,0,0.06);}
+  .lock-panel p{font-size:0.8rem;color:#555;margin:0 0 14px;line-height:1.5;}
+  .group-pick{display:flex;flex-direction:column;gap:8px;margin-bottom:6px;}
+  .group-pick button{display:flex;justify-content:space-between;align-items:center;background:var(--cream);border:1px solid var(--grid);color:var(--ink);border-radius:8px;padding:12px 14px;font-size:0.9rem;font-weight:700;cursor:pointer;}
+  .new-group-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .new-group-row input{background:var(--cream);border:1px solid var(--grid);color:var(--ink);border-radius:7px;padding:10px 12px;font-size:0.88rem;outline:none;}
+  .new-group-row input:focus{border-color:var(--red);}
+  .new-group-row input.gname{flex:1;min-width:110px;}
+  .new-group-row input.gpin{width:70px;text-align:center;}
+  .new-group-row button{background:var(--red);color:var(--white);border:none;border-radius:7px;padding:0 14px;font-weight:800;font-size:0.84rem;cursor:pointer;}
+
+  .active-group-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .active-group-bar .g{font-weight:800;font-size:0.92rem;text-transform:uppercase;}
+  .active-group-bar .g span{color:#888;font-weight:600;font-size:0.68rem;display:block;text-transform:none;}
+  .active-group-bar button{background:var(--white);border:1px solid var(--grid);color:#555;border-radius:7px;padding:6px 10px;font-size:0.7rem;cursor:pointer;font-weight:700;}
+
+  .score-rows{display:flex;flex-direction:column;}
+  .score-row{display:flex;justify-content:space-between;align-items:center;padding:13px 2px;border-bottom:1px solid var(--grid);}
+  .score-row:last-child{border-bottom:none;}
+  .prow-name{font-weight:800;text-transform:uppercase;font-size:0.94rem;}
+  .prow-hcp{display:block;font-weight:500;text-transform:none;font-size:0.68rem;color:#888;margin-top:2px;}
+  .prow-stepper{display:flex;align-items:center;gap:14px;}
+  .prow-stepper button{width:40px;height:40px;border-radius:50%;border:1px solid var(--grid);background:var(--cream);color:var(--ink);font-size:1.35rem;cursor:pointer;line-height:1;}
+  .prow-stepper button:active{background:var(--red);color:var(--white);border-color:var(--red);}
+  .prow-val{font-family:var(--mono);font-weight:900;font-size:1.4rem;color:var(--red);min-width:26px;text-align:center;}
+  .player-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;}
+  .chip{flex:0 0 auto;background:var(--white);border:1px solid var(--grid);color:var(--ink);padding:9px 15px;border-radius:20px;font-size:0.84rem;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .chip.active{background:var(--red);color:var(--white);border-color:var(--red);}
+  .chip .dot{opacity:0.7;font-weight:500;font-size:0.74rem;}
+  .no-player{text-align:center;padding:24px 16px;color:#777;font-size:0.88rem;}
+
+  .log-panel{background:var(--white);border:1px solid var(--grid);border-radius:14px;padding:18px;margin-bottom:18px;box-shadow:0 2px 6px rgba(0,0,0,0.06);}
+  .log-stats{display:flex;justify-content:space-between;font-size:0.68rem;color:#666;margin-bottom:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;}
+  .log-stats b{color:var(--ink);font-family:var(--mono);font-size:0.9rem;}
+  .hole-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .hole-nav button{background:var(--cream);border:1px solid var(--grid);color:var(--ink);width:42px;height:42px;border-radius:50%;font-size:1.15rem;cursor:pointer;}
+  .hole-title{text-align:center;}
+  .hole-title .hnum{font-family:var(--sans);font-weight:900;font-size:1.4rem;}
+  .hole-title .hpar{font-size:0.66rem;color:#777;text-transform:uppercase;letter-spacing:1px;font-weight:700;}
+  .stroke-display{display:flex;align-items:center;justify-content:center;gap:20px;margin:16px 0 14px;}
+  .stroke-display .stepbtn{width:52px;height:52px;border-radius:50%;border:1px solid var(--grid);background:var(--cream);color:var(--ink);font-size:1.5rem;cursor:pointer;}
+  .stroke-display .stepbtn:active{background:var(--red);color:var(--white);border-color:var(--red);}
+  .stroke-display .strokes{font-family:var(--mono);font-size:2.3rem;font-weight:900;color:var(--red);min-width:66px;text-align:center;}
+  .stroke-display .strokes.unset{color:#ccc;}
+  .quickpad{display:grid;grid-template-columns:repeat(9,1fr);gap:5px;margin-bottom:14px;}
+  .quickpad button{background:var(--cream);border:1px solid var(--grid);color:var(--ink);border-radius:8px;padding:9px 0;font-family:var(--mono);font-size:0.85rem;cursor:pointer;font-weight:700;}
+  .quickpad button.selected{background:var(--red);color:var(--white);border-color:var(--red);}
+  .save-next{display:block;width:100%;background:var(--ink);color:var(--white);border:none;border-radius:10px;padding:14px 0;font-size:0.95rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;}
+  .save-next:disabled{opacity:0.4;}
+  .strip{display:flex;gap:4px;margin-top:16px;overflow-x:auto;padding-bottom:2px;}
+  .strip .hchip{flex:0 0 30px;height:30px;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-size:0.62rem;border:1px solid var(--grid);color:#999;cursor:pointer;line-height:1.1;}
+  .strip .hchip.filled{background:#fbe6e9;color:var(--red);font-weight:700;}
+  .strip .hchip.current{border-color:var(--ink);color:var(--ink);font-weight:900;}
+  .strip .hchip small{font-size:0.5rem;opacity:0.7;}
+
+  .add-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .add-row input{background:var(--cream);border:1px solid var(--grid);color:var(--ink);border-radius:7px;padding:10px 12px;font-size:0.92rem;outline:none;}
+  .add-row input:focus{border-color:var(--red);}
+  .add-row input.name{flex:1;min-width:120px;}
+  .add-row input.hcp{width:56px;text-align:center;}
+  .add-row button{background:var(--red);color:var(--white);border:none;border-radius:7px;padding:0 16px;font-weight:800;font-size:0.86rem;cursor:pointer;}
+
+  .scorecard-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-top:8px;}
+  .scorecard-grid .hc{background:var(--cream);border:1px solid var(--grid);border-radius:6px;padding:5px 2px;text-align:center;}
+  .scorecard-grid .hc label{font-size:0.5rem;color:#888;display:block;margin-bottom:3px;font-weight:700;}
+  .scorecard-grid .hc input{width:100%;background:var(--white);border:1px solid var(--grid);border-radius:4px;text-align:center;font-family:var(--mono);font-size:0.72rem;padding:4px 0;margin-bottom:3px;}
+  .scorecard-grid .hc input:last-child{margin-bottom:0;}
+  .scorecard-grid .hc .flabel{font-size:0.45rem;color:#aaa;display:block;}
+  .nine-label{font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;color:var(--red);margin:14px 0 0 2px;font-weight:700;}
+
+  .manage-row{display:flex;justify-content:space-between;align-items:center;padding:8px 2px;border-bottom:1px solid var(--grid);font-size:0.82rem;}
+  .manage-row:last-child{border-bottom:none;}
+  .manage-row .del{background:none;border:none;color:#999;font-size:0.68rem;cursor:pointer;}
+  .row-actions{display:flex;gap:10px;flex:0 0 auto;}
+  .row-actions button{background:none;border:none;font-size:0.7rem;cursor:pointer;font-weight:700;}
+  .row-actions .edit-player{color:#666;text-decoration:underline;}
+  .row-actions .del-player{color:#999;}
+  .manage-row-editing{gap:6px;flex-wrap:wrap;padding:8px 2px;}
+  .manage-row-editing input{background:var(--cream);border:1px solid var(--grid);border-radius:6px;padding:6px 8px;font-size:0.8rem;}
+  .manage-row-editing .edit-name{flex:1;min-width:90px;}
+  .manage-row-editing .edit-hcp{width:56px;text-align:center;}
+  .manage-row-editing button{background:var(--red);color:var(--white);border:none;border-radius:6px;padding:6px 10px;font-size:0.72rem;font-weight:700;cursor:pointer;}
+  .manage-row-editing .cancel-player-edit, .cancel-group-edit{background:none;color:#888;text-decoration:underline;}
+  .group-block{margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--grid);}
+  .group-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+  .group-block-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .group-block-head .gn{font-weight:800;font-size:0.88rem;text-transform:uppercase;}
+  .group-block-head .gn small{display:block;font-weight:500;text-transform:none;color:#888;font-size:0.66rem;}
+  .group-block-head button{background:none;border:1px solid var(--grid);color:#999;border-radius:6px;padding:5px 9px;font-size:0.66rem;cursor:pointer;}
+
+  .tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--white);border-top:1px solid var(--grid);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:10;}
+  .tabbar button{flex:1;background:none;border:none;color:#999;padding:12px 0 10px;font-size:0.64rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;}
+  .tabbar button .ic{font-size:1.2rem;}
+  .tabbar button.active{color:var(--red);}
+
+  /* ===== Responsive scaling — the layout is built mobile-first above; these
+     breakpoints widen the container and scale typography up as the viewport
+     grows, so the leaderboard is still easy to read on a tablet or a big
+     screen in the clubhouse instead of staying pinned at phone width. ===== */
+
+  @media (min-width: 700px){
+    .wrap{max-width:920px;padding:26px 20px 0;}
+    .arch{height:96px;}
+    .arch h1{font-size:2.3rem;letter-spacing:3px;}
+    .subplaque input.tname{font-size:1.1rem;}
+    .subplaque .sub{font-size:0.68rem;}
+    table.leader-table th, table.leader-table td{padding:9px 7px;font-size:0.92rem;}
+    table.leader-table thead th{font-size:0.68rem;}
+    .stacked{font-size:0.62rem !important;}
+    td.rank-col{font-size:1.05rem;}
+    td.player-col .pn{font-size:0.92rem;}
+    td.player-col .gtag{font-size:0.6rem;}
+    th.player-col, td.player-col{min-width:150px;max-width:170px;}
+    td.score-cell{font-size:1rem;}
+    td.thru-col{font-size:0.9rem;}
+    td.total-col{font-size:0.95rem;}
+    td.net-col{font-size:1.05rem;}
+    .card{padding:18px;}
+    .log-panel{padding:24px;}
+    .hole-title .hnum{font-size:1.7rem;}
+    .hole-title .hpar{font-size:0.75rem;}
+    .score-row{padding:16px 4px;}
+    .prow-name{font-size:1.05rem;}
+    .prow-hcp{font-size:0.75rem;}
+    .prow-stepper button{width:46px;height:46px;font-size:1.55rem;}
+    .prow-val{font-size:1.6rem;min-width:34px;}
+    .save-next{font-size:1.05rem;padding:16px 0;}
+    .lock-panel, .group-lock{padding:24px;}
+    .group-pick button{font-size:1rem;padding:14px 16px;}
+  }
+
+  @media (min-width: 1100px){
+    .wrap{max-width:1200px;padding:32px 24px 0;}
+    .arch{height:110px;}
+    .arch h1{font-size:2.7rem;letter-spacing:4px;}
+    table.leader-table th, table.leader-table td{padding:11px 9px;font-size:1.02rem;}
+    table.leader-table thead th{font-size:0.74rem;}
+    .stacked{font-size:0.68rem !important;}
+    td.rank-col{font-size:1.15rem;}
+    td.player-col .pn{font-size:1rem;}
+    th.player-col, td.player-col{min-width:170px;max-width:190px;}
+    td.score-cell{font-size:1.1rem;}
+    td.net-col{font-size:1.15rem;}
+    .grid-scroll{border-radius:12px;}
+    .score-row{padding:18px 6px;}
+    .prow-name{font-size:1.15rem;}
+    .prow-stepper button{width:50px;height:50px;font-size:1.7rem;}
+    .prow-val{font-size:1.8rem;}
+    .log-panel{max-width:680px;margin:0 auto;padding:30px;}
+    .lock-panel, .group-lock{max-width:680px;margin:0 auto;padding:28px;}
+    .tabbar{max-width:1200px;left:50%;transform:translateX(-50%);border-radius:12px 12px 0 0;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="arch"><h1>LEADERS</h1></div>
+  <div class="subplaque">
+    <input class="tname" id="tname" value="Family Cup" spellcheck="false">
+    <div class="sub" id="syncTime">connecting…</div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div class="view active" id="view-leaderboard">
+    <div id="boardWrap"></div>
+    <div class="sync-note">Live from the course — updates the instant a group's scorer logs a hole. Safe to leave open in the clubhouse.</div>
+  </div>
+
+  <!-- LOG SCORE -->
+  <div class="view" id="view-log">
+    <div id="lockArea"></div>
+    <div id="loggingArea"></div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="view" id="view-admin">
+    <div id="adminArea">
+      <div class="section-title">Course scorecard</div>
+      <div class="card">
+        <p style="font-size:0.78rem;color:#666;margin:0 0 4px;line-height:1.5;">Enter Par and Stroke Index (the "handicap" row) for each hole, straight off the real scorecard. Stroke Index 1 = hardest hole, 18 = easiest — this is what makes net scoring fair across groups.</p>
+        <div class="nine-label">Front nine</div>
+        <div class="scorecard-grid" id="scoreFront"></div>
+        <div class="nine-label">Back nine</div>
+        <div class="scorecard-grid" id="scoreBack"></div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:14px;">
+          <button class="save-next" id="saveScorecardBtn" style="width:auto;padding:11px 20px;">Save scorecard</button>
+          <span id="scorecardSavedMsg" style="font-size:0.75rem;color:#3a8a4a;font-weight:700;"></span>
+        </div>
+      </div>
+
+      <div class="section-title">Groups &amp; players</div>
+      <div class="card">
+        <div class="new-group-row">
+          <input class="gname" id="adminGroupName" placeholder="Group name (e.g. Group 1)">
+          <button id="adminAddGroupBtn">Add group</button>
+        </div>
+        <div id="adminGroupError" style="color:var(--red);font-size:0.75rem;margin-top:6px;"></div>
+        <div id="adminGroupList" style="margin-top:14px;"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="tabbar">
+  <button id="tabLeaderboardBtn" class="active"><span class="ic">🏆</span>Leaderboard</button>
+  <button id="tabLogBtn"><span class="ic">⛳</span>Log Score</button>
+  <button id="tabAdminBtn"><span class="ic">🛠️</span>Admin</button>
+</div>
+
+<script>
+/* =========================================================
+   SUPABASE CONFIG — fill these in after you create your project
+   ========================================================= */
+const SUPABASE_URL = 'https://hlecesfwreysyoiatzuz.supabase.co/rest/v1/';
+const SUPABASE_ANON_KEY = 'sb_publishable_W3qyJ_rOjQ_eG04qomBt1g_HyGn_F2k';
+const ROW_ID = 'main';
+const LS_GROUP_KEY = 'familyCupUnlockedGroupId';
+const CONFIGURED = SUPABASE_URL !== 'https://hlecesfwreysyoiatzuz.supabase.co/rest/v1/' && SUPABASE_ANON_KEY !== 'sb_publishable_W3qyJ_rOjQ_eG04qomBt1g_HyGn_F2k';
+let sb = null; // named sb, not "supabase" — the CDN library itself declares a global called "supabase", and redeclaring that name here throws a syntax error that kills the whole script
+if(CONFIGURED){
+  try{ sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }
+  catch(err){ console.error('Supabase client failed to initialize', err); sb = null; }
+}
+
+function defaultHoles(){
+  return Array.from({length:18}, (_,i)=>({ par: 4, si: i+1 }));
+}
+
+let state = {
+  tournamentName: 'Family Cup',
+  course: { holes: defaultHoles() },
+  groups: [] // {id, name, startHole, players:[{id,name,hcp,scores[18]}]}
+};
+let unlockedGroupId = null;
+let dirty = false;
+let lastSavedJSON = '';
+
+function uid(){ return 'g_' + Math.random().toString(36).slice(2,9); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function holeOrder(g){
+  const start = g.startHole || 1;
+  const order = [];
+  for(let i=0;i<18;i++) order.push(((start - 1 + i) % 18) + 1);
+  return order;
+}
+function strokesReceived(hcp, si){
+  hcp = Number(hcp)||0;
+  const base = Math.floor(hcp/18);
+  const extra = (si <= (((hcp % 18)+18)%18)) ? 1 : 0;
+  return base + extra;
+}
+function playerStats(p){
+  let gross=0, thru=0, parPlayed=0, strokesGiven=0;
+  for(let i=0;i<18;i++){
+    const v = p.scores[i];
+    if(v!==null && v!==undefined && v!==''){
+      const hole = state.course.holes[i] || {par:4, si:i+1};
+      gross += Number(v); parPlayed += hole.par; thru += 1;
+      strokesGiven += strokesReceived(p.hcp, hole.si);
+    }
+  }
+  const toParGross = gross - parPlayed;
+  const netToPar = toParGross - strokesGiven;
+  return { gross, thru, parPlayed, strokesGiven, netToPar };
+}
+function fmtToPar(n){ if(n===0) return 'E'; return n>0 ? ('+'+n) : String(n); }
+function groupPos(g){
+  if(typeof g.currentPos === 'number') return g.currentPos;
+  const order = holeOrder(g);
+  for(let pos=0; pos<18; pos++){
+    const idx = order[pos]-1;
+    const allFilled = g.players.length>0 && g.players.every(p => p.scores[idx]!==null && p.scores[idx]!==undefined && p.scores[idx]!=='');
+    if(!allFilled) return pos;
+  }
+  return 18;
+}
+function allPlayersFlat(){ const out=[]; state.groups.forEach(g=>g.players.forEach(p=>out.push({p,g}))); return out; }
+function findGroup(id){ return state.groups.find(g=>g.id===id); }
+
+/* ---------- Leaderboard ---------- */
+function renderLeaderboard(){
+  const wrap = document.getElementById('boardWrap');
+  const rows = allPlayersFlat().map(({p,g}) => ({ p, g, s: playerStats(p) }));
+  rows.sort((a,b)=> a.s.netToPar - b.s.netToPar || b.s.thru - a.s.thru);
+
+  if(rows.length === 0){
+    wrap.innerHTML = '<div class="empty-board">No players yet — set the roster up in Admin.</div>';
+    return;
+  }
+  let thead = '<thead><tr>';
+  thead += '<th class="rank-col stacked" rowspan="2">RANK</th>';
+  thead += '<th class="player-col">HOLE</th>';
+  for(let i=1;i<=18;i++) thead += `<th class="${i===9?'hole9end':''}">${i}</th>`;
+  thead += '<th class="stacked" rowspan="2">THRU</th><th class="stacked" rowspan="2">TOTAL</th><th class="stacked" rowspan="2">NET</th></tr><tr>';
+  thead += '<th class="par-label">PAR</th>';
+  for(let i=0;i<18;i++) thead += `<th class="par-label ${i===8?'hole9end':''}">${state.course.holes[i].par}</th>`;
+  thead += '</tr></thead>';
+
+  let tbody = '<tbody>';
+  const anyThru = rows.some(r=>r.s.thru>0);
+  rows.forEach((r, idx) => {
+    const isLeader = idx===0 && anyThru;
+    const netCls = r.s.netToPar<0 ? 'under' : (r.s.netToPar>0 ? 'over' : 'even');
+    tbody += '<tr>';
+    tbody += `<td class="rank-col">${idx+1}</td>`;
+    tbody += `<td class="player-col"><span class="pn">${escapeHtml(r.p.name)}${isLeader?' 🏆':''}</span><span class="gtag">${escapeHtml(r.g.name)}</span></td>`;
+    for(let i=0;i<18;i++){
+      const v = r.p.scores[i];
+      const has = v!==null && v!==undefined && v!=='';
+      let scoreCls = 'empty';
+      if(has){
+        const par = state.course.holes[i].par;
+        scoreCls = v<par ? 'under' : (v>par ? 'over' : 'even');
+      }
+      tbody += `<td class="score-cell ${scoreCls} ${i===8?'hole9end':''}">${has?v:'·'}</td>`;
+    }
+    tbody += `<td class="thru-col">${r.s.thru}/18</td>`;
+    tbody += `<td class="total-col">${r.s.thru>0?r.s.gross:'—'}</td>`;
+    tbody += `<td class="net-col ${netCls}">${r.s.thru>0?fmtToPar(r.s.netToPar):'—'}</td>`;
+    tbody += '</tr>';
+  });
+  tbody += '</tbody>';
+  wrap.innerHTML = `<div class="grid-scroll"><table class="leader-table">${thead}${tbody}</table></div>`;
+}
+
+/* ---------- Log Score: pick pre-made group, shotgun start, one hole at a time for the whole group ---------- */
+let pendingStartHoleGroupId = null;
+let holeDrafts = {}; // playerId -> in-progress score for the hole currently on screen, before Save
+
+function renderLockArea(){
+  const wrap = document.getElementById('lockArea');
+  if(unlockedGroupId && findGroup(unlockedGroupId)){ wrap.innerHTML=''; return; }
+
+  if(pendingStartHoleGroupId && findGroup(pendingStartHoleGroupId)){
+    const g = findGroup(pendingStartHoleGroupId);
+    wrap.innerHTML = `
+      <div class="lock-panel">
+        <p><strong>${escapeHtml(g.name)}</strong> — shotgun start. Which hole are you starting on?</p>
+        <div class="new-group-row">
+          <input type="number" inputmode="numeric" id="startHoleInput" placeholder="Hole # (1–18)" style="width:150px;">
+          <button id="confirmStartHoleBtn">Confirm</button>
+        </div>
+        <div id="startHoleError" style="color:var(--red);font-size:0.75rem;margin-top:8px;"></div>
+      </div>`;
+    document.getElementById('startHoleInput').focus();
+    const confirmStart = ()=>{
+      const val = parseInt(document.getElementById('startHoleInput').value, 10);
+      if(!(val>=1 && val<=18)){
+        document.getElementById('startHoleError').textContent = 'Enter a number from 1 to 18.';
+        return;
+      }
+      g.startHole = val;
+      g.currentPos = 0;
+      pendingStartHoleGroupId = null;
+      unlockedGroupId = g.id;
+      holeDrafts = {};
+      editingHolePos = null;
+      try{ localStorage.setItem(LS_GROUP_KEY, g.id); }catch(e){ /* private browsing etc. — fine, just won't persist */ }
+      saveSoon();
+      renderLog();
+    };
+    document.getElementById('confirmStartHoleBtn').addEventListener('click', confirmStart);
+    document.getElementById('startHoleInput').addEventListener('keydown', e=>{ if(e.key==='Enter') confirmStart(); });
+    return;
+  }
+
+  let picks = state.groups.map(g => `<button data-id="${g.id}">${escapeHtml(g.name)}</button>`).join('');
+  wrap.innerHTML = `
+    <div class="lock-panel">
+      <p>Pick your group to log strokes for it. Groups and players are set up ahead of time in Admin — if your group isn't listed, ask whoever set up the tournament to add it.</p>
+      <div class="group-pick">${picks || '<span style="font-size:0.82rem;color:#888;">No groups set up yet — check the Admin tab.</span>'}</div>
+    </div>`;
+  wrap.querySelectorAll('.group-pick button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const g = findGroup(btn.dataset.id);
+      if(!g.startHole){
+        pendingStartHoleGroupId = g.id;
+        renderLog();
+        return;
+      }
+      if(typeof g.currentPos !== 'number') g.currentPos = groupPos(g);
+      unlockedGroupId = g.id;
+      holeDrafts = {};
+      editingHolePos = null;
+      try{ localStorage.setItem(LS_GROUP_KEY, g.id); }catch(e){ /* private browsing etc. — fine, just won't persist */ }
+      renderLog();
+    });
+  });
+}
+
+let editingHolePos = null; // when set, we're revisiting an already-played hole instead of the group's current one
+
+function renderLog(){
+  const area = document.getElementById('loggingArea');
+  const g = unlockedGroupId ? findGroup(unlockedGroupId) : null;
+  if(!g){ area.innerHTML=''; renderLockArea(); return; }
+  renderLockArea();
+
+  let bar = `<div class="active-group-bar">
+      <div class="g">${escapeHtml(g.name)}<span>Started hole ${g.startHole}</span></div>
+      <button id="lockOutBtn">Switch group</button>
+    </div>`;
+
+  const doSwitchOut = ()=>{ unlockedGroupId=null; holeDrafts={}; editingHolePos=null; try{ localStorage.removeItem(LS_GROUP_KEY); }catch(e){} renderLog(); };
+
+  if(g.players.length===0){
+    area.innerHTML = bar + '<div class="no-player">No players are on this group\'s roster yet — add them in the Admin tab.</div>';
+    document.getElementById('lockOutBtn').addEventListener('click', doSwitchOut);
+    return;
+  }
+
+  const order = holeOrder(g);
+  const groupCurrentPos = typeof g.currentPos === 'number' ? g.currentPos : groupPos(g);
+  const editablePosCount = groupCurrentPos; // holes with index 0..groupCurrentPos-1 have been played
+  const isEditing = editingHolePos !== null;
+  const pos = isEditing ? editingHolePos : groupCurrentPos;
+  const allDone = groupCurrentPos >= 18;
+
+  // "Edit a previous hole" control — available whenever at least one hole has been played
+  let editPicker = '';
+  if(editablePosCount > 0 && !isEditing){
+    let opts = '<option value="">Edit a previous hole…</option>';
+    for(let i=0;i<editablePosCount;i++) opts += `<option value="${i}">Hole ${order[i]}</option>`;
+    editPicker = `<div style="margin-bottom:14px;">
+      <select id="editHoleSelect" style="width:100%;background:var(--white);border:1px solid var(--grid);border-radius:8px;padding:10px;font-size:0.85rem;color:#555;">${opts}</select>
+    </div>`;
+  }
+
+  if(allDone && !isEditing){
+    area.innerHTML = bar + editPicker + `<div class="no-player">All 18 holes are logged for ${escapeHtml(g.name)}. Check the Leaderboard tab to see how everyone finished — or edit a hole above if something was mis-scored.</div>`;
+    document.getElementById('lockOutBtn').addEventListener('click', doSwitchOut);
+    wireEditPicker();
+    return;
+  }
+
+  const actualHole = order[pos];
+  const holeIdx = actualHole - 1;
+  const holeInfo = state.course.holes[holeIdx];
+
+  let rows = g.players.map(p=>{
+    const existing = p.scores[holeIdx];
+    if(holeDrafts[p.id] === undefined){
+      holeDrafts[p.id] = (existing!==null && existing!==undefined && existing!=='') ? Number(existing) : holeInfo.par;
+    }
+    return `<div class="score-row">
+      <div class="prow-name">${escapeHtml(p.name)}<span class="prow-hcp">Hcp ${p.hcp||0}</span></div>
+      <div class="prow-stepper">
+        <button class="prow-minus" data-pid="${p.id}">−</button>
+        <span class="prow-val" data-pid-val="${p.id}">${holeDrafts[p.id]}</span>
+        <button class="prow-plus" data-pid="${p.id}">+</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  const saveLabel = isEditing ? 'Save changes' : 'Save &amp; next hole';
+  const cancelLink = isEditing ? `<button id="cancelEdit" style="display:block;width:100%;background:none;border:none;color:#888;font-size:0.75rem;text-decoration:underline;cursor:pointer;margin-top:10px;">Cancel, don't change this hole</button>` : '';
+
+  area.innerHTML = bar + editPicker + `
+    <div class="log-panel">
+      <div class="hole-title" style="margin-bottom:10px;">
+        <div class="hnum">${isEditing?'EDITING ':''}HOLE ${actualHole}</div>
+        <div class="hpar">Par ${holeInfo.par} · Stroke Index ${holeInfo.si}</div>
+      </div>
+      <div class="score-rows">${rows}</div>
+      <button class="save-next" id="saveNext" style="margin-top:16px;">${saveLabel}</button>
+      ${cancelLink}
+    </div>`;
+
+  document.getElementById('lockOutBtn').addEventListener('click', doSwitchOut);
+  wireEditPicker();
+
+  area.querySelectorAll('.prow-minus').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const pid = btn.dataset.pid;
+      holeDrafts[pid] = Math.max(1, holeDrafts[pid]-1);
+      area.querySelector(`.prow-val[data-pid-val="${pid}"]`).textContent = holeDrafts[pid];
+    });
+  });
+  area.querySelectorAll('.prow-plus').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const pid = btn.dataset.pid;
+      holeDrafts[pid] = holeDrafts[pid]+1;
+      area.querySelector(`.prow-val[data-pid-val="${pid}"]`).textContent = holeDrafts[pid];
+    });
+  });
+  document.getElementById('saveNext').addEventListener('click', ()=>{
+    g.players.forEach(p=>{ p.scores[holeIdx] = holeDrafts[p.id] !== undefined ? holeDrafts[p.id] : holeInfo.par; });
+    if(!isEditing) g.currentPos = pos + 1;
+    editingHolePos = null;
+    holeDrafts = {};
+    saveSoon();
+    renderLog();
+    renderLeaderboard();
+  });
+  if(isEditing){
+    document.getElementById('cancelEdit').addEventListener('click', ()=>{
+      editingHolePos = null;
+      holeDrafts = {};
+      renderLog();
+    });
+  }
+
+  function wireEditPicker(){
+    const sel = document.getElementById('editHoleSelect');
+    if(!sel) return;
+    sel.addEventListener('change', ()=>{
+      if(sel.value === '') return;
+      editingHolePos = Number(sel.value);
+      holeDrafts = {};
+      renderLog();
+    });
+  }
+}
+
+/* ---------- Admin ---------- */
+
+function renderScorecardGrid(){
+  const front = document.getElementById('scoreFront');
+  const back = document.getElementById('scoreBack');
+  if(!front) return;
+  front.innerHTML=''; back.innerHTML='';
+  for(let i=0;i<18;i++){
+    const h = state.course.holes[i];
+    const cell = document.createElement('div');
+    cell.className = 'hc';
+    cell.innerHTML = `<label>H${i+1}</label>
+      <input type="number" inputmode="numeric" class="parInput" value="${h.par}">
+      <span class="flabel">Par</span>
+      <input type="number" inputmode="numeric" class="siInput" value="${h.si}">
+      <span class="flabel">Stroke idx</span>`;
+    cell.querySelector('.parInput').addEventListener('change', e=>{ state.course.holes[i].par = Number(e.target.value)||4; saveSoon(); renderAll(); });
+    cell.querySelector('.siInput').addEventListener('change', e=>{ state.course.holes[i].si = Number(e.target.value)||(i+1); saveSoon(); renderAll(); });
+    (i<9?front:back).appendChild(cell);
+  }
+  const saveBtn = document.getElementById('saveScorecardBtn');
+  if(saveBtn){
+    saveBtn.onclick = async ()=>{
+      await saveNow();
+      const msg = document.getElementById('scorecardSavedMsg');
+      msg.textContent = sb ? 'Scorecard saved ✓' : 'Saved locally (Supabase not connected yet)';
+      clearTimeout(window.__scorecardMsgTimer);
+      window.__scorecardMsgTimer = setTimeout(()=>{ msg.textContent=''; }, 2500);
+    };
+  }
+}
+
+let editingGroupId = null; // group whose name is being edited inline
+let editingPlayerId = null; // player whose name/hcp is being edited inline
+
+function renderAdminGroupList(){
+  const wrap = document.getElementById('adminGroupList');
+  if(!wrap) return;
+  if(state.groups.length===0){ wrap.innerHTML = '<div style="font-size:0.82rem;color:#888;">No groups yet — add one above.</div>'; return; }
+  wrap.innerHTML = state.groups.map(g=>{
+    const rows = g.players.map(p=>{
+      const s = playerStats(p);
+      if(editingPlayerId === p.id){
+        return `<div class="manage-row manage-row-editing">
+          <input class="edit-name" data-gid="${g.id}" data-pid="${p.id}" value="${escapeHtml(p.name)}" placeholder="Name">
+          <input class="edit-hcp" data-gid="${g.id}" data-pid="${p.id}" value="${p.hcp||0}" type="number" inputmode="numeric" placeholder="Hcp">
+          <button class="save-player-edit" data-gid="${g.id}" data-pid="${p.id}">Save</button>
+          <button class="cancel-player-edit">Cancel</button>
+        </div>`;
+      }
+      return `<div class="manage-row"><span>${escapeHtml(p.name)} · Hcp ${p.hcp||0} · ${s.thru}/18</span>
+        <span class="row-actions">
+          <button class="edit-player" data-pid="${p.id}">Edit</button>
+          <button class="del-player" data-gid="${g.id}" data-pid="${p.id}">Remove</button>
+        </span>
+      </div>`;
+    }).join('') || '<div class="manage-row"><span style="opacity:0.5;">No players yet</span></div>';
+
+    const headName = editingGroupId === g.id
+      ? `<div class="new-group-row" style="margin-bottom:0;">
+           <input class="edit-group-name" data-gid="${g.id}" value="${escapeHtml(g.name)}" style="flex:1;min-width:100px;">
+           <button class="save-group-edit" data-gid="${g.id}">Save</button>
+           <button class="cancel-group-edit">Cancel</button>
+         </div>`
+      : `<div class="gn">${escapeHtml(g.name)} <button class="edit-group" data-gid="${g.id}" style="background:none;border:none;color:#888;font-size:0.7rem;cursor:pointer;text-decoration:underline;">Edit</button><small>${g.startHole ? 'Starts hole '+g.startHole : 'Start hole not set yet'}</small></div>`;
+
+    return `<div class="group-block">
+      <div class="group-block-head">
+        ${headName}
+        <button class="del-group" data-gid="${g.id}">Remove group</button>
+      </div>
+      ${rows}
+      <div class="add-row" style="margin-top:8px;">
+        <input class="name" data-gid="${g.id}" placeholder="Add player">
+        <input class="hcp" data-gid="${g.id}" placeholder="Hcp" type="number" inputmode="numeric">
+        <button class="add-player-btn" data-gid="${g.id}">Add</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  wrap.querySelectorAll('.del-player').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const g = findGroup(btn.dataset.gid);
+      g.players = g.players.filter(p=>p.id!==btn.dataset.pid);
+      saveSoon(); renderAll();
+    });
+  });
+  wrap.querySelectorAll('.edit-player').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ editingPlayerId = btn.dataset.pid; renderAdminGroupList(); });
+  });
+  wrap.querySelectorAll('.cancel-player-edit').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ editingPlayerId = null; renderAdminGroupList(); });
+  });
+  wrap.querySelectorAll('.save-player-edit').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const g = findGroup(btn.dataset.gid);
+      const p = g.players.find(pp=>pp.id===btn.dataset.pid);
+      const nameInp = wrap.querySelector(`.edit-name[data-pid="${btn.dataset.pid}"]`);
+      const hcpInp = wrap.querySelector(`.edit-hcp[data-pid="${btn.dataset.pid}"]`);
+      const name = nameInp.value.trim();
+      if(!name) return;
+      p.name = name;
+      p.hcp = Number(hcpInp.value)||0;
+      editingPlayerId = null;
+      saveSoon(); renderAll();
+    });
+  });
+  wrap.querySelectorAll('.edit-group').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ editingGroupId = btn.dataset.gid; renderAdminGroupList(); });
+  });
+  wrap.querySelectorAll('.cancel-group-edit').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ editingGroupId = null; renderAdminGroupList(); });
+  });
+  wrap.querySelectorAll('.save-group-edit').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const g = findGroup(btn.dataset.gid);
+      const nameInp = wrap.querySelector(`.edit-group-name[data-gid="${btn.dataset.gid}"]`);
+      const name = nameInp.value.trim();
+      if(!name) return;
+      g.name = name;
+      editingGroupId = null;
+      saveSoon(); renderAll();
+    });
+  });
+  wrap.querySelectorAll('.del-group').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(btn.dataset.armed === '1'){
+        state.groups = state.groups.filter(g=>g.id!==btn.dataset.gid);
+        if(unlockedGroupId===btn.dataset.gid) unlockedGroupId=null;
+        saveSoon(); renderAll();
+      } else {
+        btn.dataset.armed = '1';
+        btn.textContent = 'Tap again to confirm';
+        btn.style.color = 'var(--red)';
+        btn.style.borderColor = 'var(--red)';
+        clearTimeout(btn.__armTimer);
+        btn.__armTimer = setTimeout(()=>{ btn.dataset.armed=''; btn.textContent='Remove group'; btn.style.color=''; btn.style.borderColor=''; }, 3000);
+      }
+    });
+  });
+  wrap.querySelectorAll('.add-player-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const gid = btn.dataset.gid;
+      const g = findGroup(gid);
+      const nameInp = wrap.querySelector(`.name[data-gid="${gid}"]`);
+      const hcpInp = wrap.querySelector(`.hcp[data-gid="${gid}"]`);
+      const name = nameInp.value.trim();
+      if(!name) return;
+      g.players.push({ id: uid(), name, hcp: Number(hcpInp.value)||0, scores: Array(18).fill(null) });
+      saveSoon(); renderAll();
+    });
+  });
+}
+
+function renderAdmin(){
+  renderScorecardGrid();
+  renderAdminGroupList();
+}
+
+document.getElementById('adminAddGroupBtn').addEventListener('click', ()=>{
+  const nameInp = document.getElementById('adminGroupName');
+  const errEl = document.getElementById('adminGroupError');
+  const name = nameInp.value.trim();
+  if(!name){ errEl.textContent = 'Enter a group name.'; return; }
+  errEl.textContent = '';
+  state.groups.push({ id: uid(), name, startHole: null, players: [] });
+  nameInp.value='';
+  saveSoon(); renderAll();
+});
+
+/* ---------- Global render ---------- */
+function renderAll(){
+  document.getElementById('tname').value = state.tournamentName;
+  renderLeaderboard();
+  renderLog();
+  renderAdmin();
+}
+
+/* ---------- Persistence: Supabase (realtime) ---------- */
+function saveSoon(){
+  dirty = true;
+  clearTimeout(window.__saveTimer);
+  window.__saveTimer = setTimeout(saveNow, 350);
+}
+async function saveNow(){
+  if(!sb){ setSyncLabel('preview mode — not saved', true); dirty=false; return; }
+  try{
+    const json = JSON.stringify(state);
+    if(json === lastSavedJSON){ dirty=false; return; }
+    const { error } = await sb.from('tournament_state').upsert({ id: ROW_ID, data: state, updated_at: new Date().toISOString() });
+    if(error) throw error;
+    lastSavedJSON = json; dirty = false;
+    setSyncLabel('synced', false);
+  }catch(err){ console.error('save failed', err); setSyncLabel('save failed — check connection', true); }
+}
+async function loadInitial(){
+  if(!sb){ setSyncLabel('preview mode — add Supabase keys', true); return; }
+  try{
+    const { data, error } = await sb.from('tournament_state').select('data').eq('id', ROW_ID).single();
+    if(error) throw error;
+    if(data && data.data){ state = data.data; if(!state.course) state.course={holes:defaultHoles()}; lastSavedJSON = JSON.stringify(state); }
+    setSyncLabel('live', false);
+  }catch(err){ console.error('load failed', err); setSyncLabel('setup needed — see console', true); }
+}
+function subscribeRealtime(){
+  if(!sb) return;
+  sb.channel('tournament_state_changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'tournament_state', filter: `id=eq.${ROW_ID}` }, payload => {
+      if(payload.new && payload.new.data && !dirty){
+        state = payload.new.data;
+        lastSavedJSON = JSON.stringify(state);
+        renderAll();
+        setSyncLabel('live update', false);
+      }
+    })
+    .subscribe();
+}
+function setSyncLabel(txt, isErr){
+  const el = document.getElementById('syncTime');
+  const now = new Date();
+  el.textContent = txt + ' · ' + now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  el.classList.toggle('err', !!isErr);
+}
+
+/* ---------- Tabs ---------- */
+function showView(name){
+  document.getElementById('view-leaderboard').classList.toggle('active', name==='leaderboard');
+  document.getElementById('view-log').classList.toggle('active', name==='log');
+  document.getElementById('view-admin').classList.toggle('active', name==='admin');
+  document.getElementById('tabLeaderboardBtn').classList.toggle('active', name==='leaderboard');
+  document.getElementById('tabLogBtn').classList.toggle('active', name==='log');
+  document.getElementById('tabAdminBtn').classList.toggle('active', name==='admin');
+}
+document.getElementById('tabLeaderboardBtn').addEventListener('click', ()=>showView('leaderboard'));
+document.getElementById('tabLogBtn').addEventListener('click', ()=>showView('log'));
+document.getElementById('tabAdminBtn').addEventListener('click', ()=>{ showView('admin'); renderAdmin(); });
+
+document.getElementById('tname').addEventListener('change', e=>{ state.tournamentName = e.target.value || 'Family Cup'; saveSoon(); });
+
+/* ---------- Init ---------- */
+(async function init(){
+  await loadInitial();
+  try{
+    const savedId = localStorage.getItem(LS_GROUP_KEY);
+    if(savedId && findGroup(savedId)) unlockedGroupId = savedId;
+  }catch(e){ /* private browsing etc. — just falls back to the picker */ }
+  renderAll();
+  subscribeRealtime();
+})();
+</script>
+</body>
+</html>
