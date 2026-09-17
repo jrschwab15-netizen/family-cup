@@ -27,9 +27,8 @@
   .arch{background:var(--white);border-radius:50% 50% 0 0 / 90px 90px 0 0;height:78px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,0.18);}
   .arch h1{font-family:var(--sans);font-weight:900;font-size:1.9rem;letter-spacing:2px;margin:0;}
   .subplaque{background:var(--white);border-top:2px solid var(--grid);padding:8px 16px 10px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 3px 8px rgba(0,0,0,0.1);margin-bottom:16px;border-radius:0 0 6px 6px;}
-  .subplaque input.tname{background:transparent;border:none;color:var(--ink);font-family:var(--sans);font-weight:900;font-size:0.95rem;letter-spacing:0.5px;text-transform:uppercase;outline:none;width:100%;border-bottom:1px dashed transparent;}
-  .subplaque input.tname:focus{border-bottom:1px dashed var(--red);}
-  .subplaque .sub{font-size:0.58rem;color:#777;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;font-weight:700;}
+  .subplaque .tname{color:var(--ink);font-family:var(--sans);font-weight:900;font-size:0.95rem;letter-spacing:0.5px;text-transform:uppercase;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .subplaque .sub{font-size:0.58rem;color:#777;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;font-weight:700;}
   .subplaque .sub.err{color:var(--red);}
 
   .grid-scroll{overflow-x:auto;background:var(--white);border:1px solid var(--grid);border-radius:8px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
@@ -37,8 +36,8 @@
   table.leader-table th, table.leader-table td{border:1px solid var(--grid);text-align:center;padding:6px 4px;font-size:0.78rem;white-space:nowrap;}
   table.leader-table thead th{background:var(--white);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.5px;color:#555;font-weight:800;}
   .stacked{writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.55rem !important;letter-spacing:1px;padding:6px 3px !important;}
-  th.rank-col, td.rank-col{position:sticky;left:0;z-index:2;min-width:34px;}
-  th.player-col, td.player-col{position:sticky;left:34px;z-index:2;text-align:left;min-width:118px;max-width:118px;overflow:hidden;text-overflow:ellipsis;}
+  th.rank-col, td.rank-col{min-width:34px;}
+  th.player-col, td.player-col{text-align:left;min-width:118px;max-width:118px;overflow:hidden;text-overflow:ellipsis;}
   td.rank-col, td.player-col{background:var(--white);}
   tbody tr:nth-child(even) td.rank-col, tbody tr:nth-child(even) td.player-col{background:var(--rowalt);}
   th.rank-col, th.player-col{background:var(--white);}
@@ -51,6 +50,9 @@
   td.score-cell.even{color:var(--ink);}
   td.score-cell.over{color:var(--red);}
   td.score-cell.empty{color:transparent;}
+  .mark-circle, .mark-square{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border:1.5px solid currentColor;line-height:1;box-sizing:border-box;}
+  .mark-circle{border-radius:50%;}
+  .mark-square{border-radius:2px;}
   th.hole9end, td.hole9end{border-right:3px solid var(--ink);}
   th.par-label, td.par-label-row{font-weight:800;font-size:0.6rem;color:#555;}
   td.thru-col{font-family:var(--mono);font-weight:700;font-size:0.8rem;color:#333;}
@@ -66,7 +68,9 @@
   .lock-panel{background:var(--white);border:1px solid var(--grid);border-radius:12px;padding:18px 16px;margin-bottom:18px;box-shadow:0 2px 6px rgba(0,0,0,0.06);}
   .lock-panel p{font-size:0.8rem;color:#555;margin:0 0 14px;line-height:1.5;}
   .group-pick{display:flex;flex-direction:column;gap:8px;margin-bottom:6px;}
-  .group-pick button{display:flex;justify-content:space-between;align-items:center;background:var(--cream);border:1px solid var(--grid);color:var(--ink);border-radius:8px;padding:12px 14px;font-size:0.9rem;font-weight:700;cursor:pointer;}
+  .group-pick button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;background:var(--cream);border:1px solid var(--grid);color:var(--ink);border-radius:8px;padding:12px 14px;font-size:0.9rem;font-weight:700;cursor:pointer;text-align:left;width:100%;}
+  .group-pick .gpick-name{font-weight:700;}
+  .group-pick .gpick-roster{font-weight:500;font-size:0.72rem;color:#888;text-transform:none;}
   .new-group-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
   .new-group-row input{background:var(--cream);border:1px solid var(--grid);color:var(--ink);border-radius:7px;padding:10px 12px;font-size:0.88rem;outline:none;}
   .new-group-row input:focus{border-color:var(--red);}
@@ -167,7 +171,7 @@
     .wrap{max-width:920px;padding:26px 20px 0;}
     .arch{height:96px;}
     .arch h1{font-size:2.3rem;letter-spacing:3px;}
-    .subplaque input.tname{font-size:1.1rem;}
+    .subplaque .tname{font-size:1.1rem;}
     .subplaque .sub{font-size:0.68rem;}
     table.leader-table th, table.leader-table td{padding:9px 7px;font-size:0.92rem;}
     table.leader-table thead th{font-size:0.68rem;}
@@ -222,7 +226,7 @@
 
   <div class="arch"><h1>LEADERS</h1></div>
   <div class="subplaque">
-    <input class="tname" id="tname" value="Family Cup" spellcheck="false">
+    <div class="tname" id="tname">Family Cup</div>
     <div class="sub" id="syncTime">connecting…</div>
   </div>
 
@@ -242,6 +246,30 @@
   <div class="view" id="view-admin">
     <div id="adminLockArea"></div>
     <div id="adminArea" style="display:none;">
+      <div class="section-title">Tournament</div>
+      <div class="card">
+        <label style="font-size:0.78rem;color:#666;display:block;margin-bottom:6px;">Tournament name</label>
+        <input id="adminTournamentName" style="width:100%;background:var(--cream);border:1px solid var(--grid);border-radius:7px;padding:10px 12px;font-size:0.92rem;color:var(--ink);font-weight:600;">
+      </div>
+
+      <div class="section-title">Round format</div>
+      <div class="card">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:0.88rem;font-weight:600;cursor:pointer;">
+            <input type="radio" name="startMode" id="startModeShotgun" value="shotgun" style="width:16px;height:16px;">
+            Shotgun start — each group starts on a different hole
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:0.88rem;font-weight:600;cursor:pointer;">
+            <input type="radio" name="startMode" id="startModeStandard" value="standard" style="width:16px;height:16px;">
+            Standard start — every group tees off from the same hole
+          </label>
+        </div>
+        <div id="standardHoleRow" style="display:none;margin-top:12px;">
+          <label style="font-size:0.78rem;color:#666;display:block;margin-bottom:6px;">Starting hole for every group</label>
+          <input type="number" inputmode="numeric" id="standardStartHoleInput" style="width:90px;background:var(--cream);border:1px solid var(--grid);border-radius:7px;padding:8px 10px;text-align:center;font-size:0.9rem;">
+        </div>
+      </div>
+
       <div class="section-title">Course scorecard</div>
       <div class="card">
         <p style="font-size:0.78rem;color:#666;margin:0 0 4px;line-height:1.5;">Enter Par and Stroke Index (the "handicap" row) for each hole, straight off the real scorecard. Stroke Index 1 = hardest hole, 18 = easiest — this is what makes net scoring fair across groups.</p>
@@ -264,6 +292,13 @@
         <div id="adminGroupError" style="color:var(--red);font-size:0.75rem;margin-top:6px;"></div>
         <div id="adminGroupList" style="margin-top:14px;"></div>
       </div>
+
+      <div class="section-title">Session</div>
+      <div class="card">
+        <p style="font-size:0.78rem;color:#666;margin:0 0 12px;line-height:1.5;">Clearing the board archives everything currently on it (course, groups, and scores) so it can be restored later, then starts a fresh, empty session.</p>
+        <button id="clearBoardBtn" style="background:var(--white);border:1px solid var(--red);color:var(--red);border-radius:7px;padding:10px 16px;font-weight:700;font-size:0.85rem;cursor:pointer;">Clear board (archive current session)</button>
+        <div id="pastSessionsWrap" style="margin-top:16px;"></div>
+      </div>
     </div>
   </div>
 
@@ -283,6 +318,7 @@ const SUPABASE_URL = 'https://hlecesfwreysyoiatzuz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_W3qyJ_rOjQ_eG04qomBt1g_HyGn_F2k';
 const ROW_ID = 'main';
 const LS_GROUP_KEY = 'familyCupUnlockedGroupId';
+const LS_DEVICE_LOGGED_KEY = 'familyCupDeviceHasLogged'; // once true, switching groups on this device needs the admin PIN
 const CONFIGURED = SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY';
 let sb = null; // named sb, not "supabase" — the CDN library itself declares a global called "supabase", and redeclaring that name here throws a syntax error that kills the whole script
 if(CONFIGURED){
@@ -297,8 +333,11 @@ function defaultHoles(){
 let state = {
   tournamentName: 'Family Cup',
   adminPin: null,
+  startMode: 'shotgun', // 'shotgun' | 'standard'
+  standardStartHole: 1,
   course: { holes: defaultHoles() },
-  groups: [] // {id, name, startHole, players:[{id,name,hcp,scores[18]}]}
+  groups: [], // {id, name, startHole, players:[{id,name,hcp,scores[18]}]}
+  archives: [] // {id, archivedAt, tournamentName, course, groups} — snapshots from "Clear board"
 };
 let unlockedGroupId = null;
 let adminUnlocked = false;
@@ -346,6 +385,14 @@ function groupPos(g){
   return 18;
 }
 function allPlayersFlat(){ const out=[]; state.groups.forEach(g=>g.players.forEach(p=>out.push({p,g}))); return out; }
+
+function computeRanks(){
+  const rows = allPlayersFlat().map(({p,g}) => ({ p, s: playerStats(p) }));
+  rows.sort((a,b)=> a.s.netToPar - b.s.netToPar || b.s.thru - a.s.thru);
+  const ranks = new Map();
+  rows.forEach((r, idx) => ranks.set(r.p.id, idx+1));
+  return ranks;
+}
 function findGroup(id){ return state.groups.find(g=>g.id===id); }
 
 /* ---------- Leaderboard ---------- */
@@ -379,11 +426,16 @@ function renderLeaderboard(){
       const v = r.p.scores[i];
       const has = v!==null && v!==undefined && v!=='';
       let scoreCls = 'empty';
+      let shapeCls = '';
       if(has){
         const par = state.course.holes[i].par;
-        scoreCls = v<par ? 'under' : (v>par ? 'over' : 'even');
+        const diff = v - par;
+        scoreCls = diff<0 ? 'under' : (diff>0 ? 'over' : 'even');
+        if(diff <= -1) shapeCls = 'mark-circle';
+        else if(diff === 1 || diff === 2) shapeCls = 'mark-square';
       }
-      tbody += `<td class="score-cell ${scoreCls} ${i===8?'hole9end':''}">${has?v:'·'}</td>`;
+      const inner = has ? (shapeCls ? `<span class="${shapeCls}">${v}</span>` : v) : '·';
+      tbody += `<td class="score-cell ${scoreCls} ${i===8?'hole9end':''}">${inner}</td>`;
     }
     tbody += `<td class="thru-col">${r.s.thru}/18</td>`;
     tbody += `<td class="total-col">${r.s.thru>0?r.s.gross:'—'}</td>`;
@@ -435,7 +487,10 @@ function renderLockArea(){
     return;
   }
 
-  let picks = state.groups.map(g => `<button data-id="${g.id}">${escapeHtml(g.name)}</button>`).join('');
+  let picks = state.groups.map(g => {
+    const roster = g.players.map(p=>p.name).join(', ') || 'No players yet';
+    return `<button data-id="${g.id}"><span class="gpick-name">${escapeHtml(g.name)}</span><span class="gpick-roster">${escapeHtml(roster)}</span></button>`;
+  }).join('');
   wrap.innerHTML = `
     <div class="lock-panel">
       <p>Pick your group to log strokes for it. Groups and players are set up ahead of time in Admin — if your group isn't listed, ask whoever set up the tournament to add it.</p>
@@ -445,6 +500,17 @@ function renderLockArea(){
     btn.addEventListener('click', ()=>{
       const g = findGroup(btn.dataset.id);
       if(!g.startHole){
+        if(state.startMode === 'standard'){
+          g.startHole = state.standardStartHole || 1;
+          g.currentPos = 0;
+          unlockedGroupId = g.id;
+          holeDrafts = {};
+          editingHolePos = null;
+          try{ localStorage.setItem(LS_GROUP_KEY, g.id); }catch(e){ /* private browsing etc. — fine, just won't persist */ }
+          saveSoon();
+          renderLog();
+          return;
+        }
         pendingStartHoleGroupId = g.id;
         renderLog();
         return;
@@ -460,9 +526,52 @@ function renderLockArea(){
 }
 
 let editingHolePos = null; // when set, we're revisiting an already-played hole instead of the group's current one
+let pendingSwitchOut = false; // when set, this device is asking for the admin PIN before it will let go of its current group
+
+function deviceHasLogged(){
+  try{ return localStorage.getItem(LS_DEVICE_LOGGED_KEY) === '1'; }catch(e){ return false; }
+}
+function markDeviceHasLogged(){
+  try{ localStorage.setItem(LS_DEVICE_LOGGED_KEY, '1'); }catch(e){ /* private browsing etc. */ }
+}
 
 function renderLog(){
   const area = document.getElementById('loggingArea');
+
+  if(pendingSwitchOut){
+    if(!state.adminPin){
+      area.innerHTML = `<div class="lock-panel"><p>A score has already been logged from this device, so switching groups needs the admin PIN — but no admin PIN has been set yet. Ask whoever set up the tournament to set one in the Admin tab first.</p>
+        <button id="cancelSwitchBtn" style="background:none;color:#888;text-decoration:underline;border:none;cursor:pointer;font-size:0.8rem;">Go back</button></div>`;
+      document.getElementById('cancelSwitchBtn').addEventListener('click', ()=>{ pendingSwitchOut=false; renderLog(); });
+      return;
+    }
+    area.innerHTML = `
+      <div class="lock-panel">
+        <p>A score has already been logged from this device. Enter the admin PIN to switch to a different group — this is to stop someone else's group from getting tampered with by accident.</p>
+        <div class="new-group-row">
+          <input type="password" inputmode="numeric" id="switchAdminPin" placeholder="Admin PIN" style="width:140px;">
+          <button id="confirmSwitchBtn">Confirm</button>
+        </div>
+        <div id="switchAdminError" style="color:var(--red);font-size:0.75rem;margin-top:8px;"></div>
+        <button id="cancelSwitchBtn" style="background:none;color:#888;text-decoration:underline;border:none;cursor:pointer;font-size:0.78rem;margin-top:10px;">Cancel, stay on this group</button>
+      </div>`;
+    const doConfirmSwitch = ()=>{
+      const pin = document.getElementById('switchAdminPin').value.trim();
+      if(pin !== state.adminPin){
+        document.getElementById('switchAdminError').textContent = 'Wrong PIN.';
+        return;
+      }
+      pendingSwitchOut = false;
+      unlockedGroupId = null; holeDrafts = {}; editingHolePos = null;
+      try{ localStorage.removeItem(LS_GROUP_KEY); }catch(e){}
+      renderLog();
+    };
+    document.getElementById('confirmSwitchBtn').addEventListener('click', doConfirmSwitch);
+    document.getElementById('switchAdminPin').addEventListener('keydown', e=>{ if(e.key==='Enter') doConfirmSwitch(); });
+    document.getElementById('cancelSwitchBtn').addEventListener('click', ()=>{ pendingSwitchOut=false; renderLog(); });
+    return;
+  }
+
   const g = unlockedGroupId ? findGroup(unlockedGroupId) : null;
   if(!g){ area.innerHTML=''; renderLockArea(); return; }
   renderLockArea();
@@ -472,7 +581,16 @@ function renderLog(){
       <button id="lockOutBtn">Switch group</button>
     </div>`;
 
-  const doSwitchOut = ()=>{ unlockedGroupId=null; holeDrafts={}; editingHolePos=null; try{ localStorage.removeItem(LS_GROUP_KEY); }catch(e){} renderLog(); };
+  const doSwitchOut = ()=>{
+    if(deviceHasLogged()){
+      pendingSwitchOut = true;
+      renderLog();
+      return;
+    }
+    unlockedGroupId=null; holeDrafts={}; editingHolePos=null;
+    try{ localStorage.removeItem(LS_GROUP_KEY); }catch(e){}
+    renderLog();
+  };
 
   if(g.players.length===0){
     area.innerHTML = bar + '<div class="no-player">No players are on this group\'s roster yet — add them in the Admin tab.</div>';
@@ -507,14 +625,17 @@ function renderLog(){
   const actualHole = order[pos];
   const holeIdx = actualHole - 1;
   const holeInfo = state.course.holes[holeIdx];
+  const ranks = computeRanks();
 
   let rows = g.players.map(p=>{
     const existing = p.scores[holeIdx];
     if(holeDrafts[p.id] === undefined){
       holeDrafts[p.id] = (existing!==null && existing!==undefined && existing!=='') ? Number(existing) : holeInfo.par;
     }
+    const s = playerStats(p);
+    const rankTag = s.thru > 0 ? ` (${ranks.get(p.id)})` : '';
     return `<div class="score-row">
-      <div class="prow-name">${escapeHtml(p.name)}<span class="prow-hcp">Hcp ${p.hcp||0}</span></div>
+      <div class="prow-name">${escapeHtml(p.name)}${rankTag}<span class="prow-hcp">Hcp ${p.hcp||0}</span></div>
       <div class="prow-stepper">
         <button class="prow-minus" data-pid="${p.id}">−</button>
         <span class="prow-val" data-pid-val="${p.id}">${holeDrafts[p.id]}</span>
@@ -559,6 +680,7 @@ function renderLog(){
     if(!isEditing) g.currentPos = pos + 1;
     editingHolePos = null;
     holeDrafts = {};
+    markDeviceHasLogged();
     saveSoon();
     renderLog();
     renderLeaderboard();
@@ -769,11 +891,126 @@ function renderAdminLock(){
   }
 }
 
+function renderTournamentSettings(){
+  const nameInp = document.getElementById('adminTournamentName');
+  if(!nameInp) return;
+  nameInp.value = state.tournamentName;
+  nameInp.onchange = ()=>{
+    state.tournamentName = nameInp.value.trim() || 'Family Cup';
+    nameInp.value = state.tournamentName;
+    saveSoon(); renderAll();
+  };
+}
+
+function renderRoundFormat(){
+  const shotgunRadio = document.getElementById('startModeShotgun');
+  const standardRadio = document.getElementById('startModeStandard');
+  const holeRow = document.getElementById('standardHoleRow');
+  const holeInput = document.getElementById('standardStartHoleInput');
+  if(!shotgunRadio) return;
+
+  shotgunRadio.checked = state.startMode !== 'standard';
+  standardRadio.checked = state.startMode === 'standard';
+  holeRow.style.display = state.startMode === 'standard' ? 'block' : 'none';
+  holeInput.value = state.standardStartHole || 1;
+
+  shotgunRadio.onchange = ()=>{ state.startMode = 'shotgun'; saveSoon(); renderAdmin(); };
+  standardRadio.onchange = ()=>{ state.startMode = 'standard'; saveSoon(); renderAdmin(); };
+  holeInput.onchange = ()=>{
+    const n = parseInt(holeInput.value, 10);
+    state.standardStartHole = (n>=1 && n<=18) ? n : 1;
+    holeInput.value = state.standardStartHole;
+    saveSoon();
+  };
+}
+
+function renderSessionControls(){
+  const clearBtn = document.getElementById('clearBoardBtn');
+  if(!clearBtn) return;
+
+  clearBtn.onclick = ()=>{
+    if(clearBtn.dataset.armed === '1'){
+      const snapshot = {
+        id: uid(),
+        archivedAt: new Date().toISOString(),
+        tournamentName: state.tournamentName,
+        course: JSON.parse(JSON.stringify(state.course)),
+        groups: JSON.parse(JSON.stringify(state.groups))
+      };
+      if(!state.archives) state.archives = [];
+      state.archives.unshift(snapshot);
+      if(state.archives.length > 10) state.archives = state.archives.slice(0,10);
+      state.groups = [];
+      state.course = { holes: defaultHoles() };
+      unlockedGroupId = null;
+      try{ localStorage.removeItem(LS_GROUP_KEY); }catch(e){}
+      try{ localStorage.removeItem(LS_DEVICE_LOGGED_KEY); }catch(e){}
+      clearBtn.dataset.armed = '';
+      clearBtn.textContent = 'Clear board (archive current session)';
+      saveSoon(); renderAll();
+    } else {
+      clearBtn.dataset.armed = '1';
+      clearBtn.textContent = 'Tap again to confirm — this clears the live board';
+      clearTimeout(clearBtn.__armTimer);
+      clearBtn.__armTimer = setTimeout(()=>{ clearBtn.dataset.armed=''; clearBtn.textContent='Clear board (archive current session)'; }, 4000);
+    }
+  };
+
+  const wrap = document.getElementById('pastSessionsWrap');
+  const archives = state.archives || [];
+  if(archives.length === 0){
+    wrap.innerHTML = '<div style="font-size:0.8rem;color:#888;">No archived sessions yet.</div>';
+    return;
+  }
+  wrap.innerHTML = '<div class="section-title" style="margin-top:4px;">Past sessions</div>' + archives.map(a=>{
+    const when = new Date(a.archivedAt).toLocaleString([], {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
+    return `<div class="manage-row">
+      <span>${escapeHtml(a.tournamentName || 'Untitled')} · ${when} · ${a.groups.length} group${a.groups.length===1?'':'s'}</span>
+      <button class="restore-archive" data-id="${a.id}" style="background:none;border:1px solid var(--grid);color:#555;border-radius:6px;padding:5px 10px;font-size:0.7rem;cursor:pointer;">Restore</button>
+    </div>`;
+  }).join('');
+
+  wrap.querySelectorAll('.restore-archive').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(btn.dataset.armed === '1'){
+        const idx = state.archives.findIndex(a=>a.id===btn.dataset.id);
+        if(idx===-1) return;
+        const snap = state.archives[idx];
+        const currentSnapshot = {
+          id: uid(),
+          archivedAt: new Date().toISOString(),
+          tournamentName: state.tournamentName,
+          course: JSON.parse(JSON.stringify(state.course)),
+          groups: JSON.parse(JSON.stringify(state.groups))
+        };
+        state.archives.splice(idx,1);
+        state.archives.unshift(currentSnapshot);
+        if(state.archives.length > 10) state.archives = state.archives.slice(0,10);
+        state.tournamentName = snap.tournamentName;
+        state.course = snap.course;
+        state.groups = snap.groups;
+        unlockedGroupId = null;
+        try{ localStorage.removeItem(LS_GROUP_KEY); }catch(e){}
+        try{ localStorage.removeItem(LS_DEVICE_LOGGED_KEY); }catch(e){}
+        saveSoon(); renderAll();
+      } else {
+        btn.dataset.armed = '1';
+        btn.textContent = 'Tap again to restore';
+        clearTimeout(btn.__armTimer);
+        btn.__armTimer = setTimeout(()=>{ btn.dataset.armed=''; btn.textContent='Restore'; }, 4000);
+      }
+    });
+  });
+}
+
 function renderAdmin(){
   renderAdminLock();
   if(adminUnlocked){
+    renderTournamentSettings();
+    renderRoundFormat();
     renderScorecardGrid();
     renderAdminGroupList();
+    renderSessionControls();
   }
 }
 
@@ -790,7 +1027,7 @@ document.getElementById('adminAddGroupBtn').addEventListener('click', ()=>{
 
 /* ---------- Global render ---------- */
 function renderAll(){
-  document.getElementById('tname').value = state.tournamentName;
+  document.getElementById('tname').textContent = state.tournamentName;
   renderLeaderboard();
   renderLog();
   renderAdmin();
@@ -855,7 +1092,7 @@ document.getElementById('tabLeaderboardBtn').addEventListener('click', ()=>showV
 document.getElementById('tabLogBtn').addEventListener('click', ()=>showView('log'));
 document.getElementById('tabAdminBtn').addEventListener('click', ()=>{ showView('admin'); renderAdmin(); });
 
-document.getElementById('tname').addEventListener('change', e=>{ state.tournamentName = e.target.value || 'Family Cup'; saveSoon(); });
+
 
 /* ---------- Init ---------- */
 (async function init(){
