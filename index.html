@@ -437,7 +437,7 @@ function renderLeaderboard(){
   thead += '<th class="player-col">HOLE</th>';
   for(let i=1;i<=18;i++) thead += `<th class="hole-th ${i===9?'hole9end':''}">${i}</th>`;
   thead += '<th class="thru-col stacked" rowspan="2">THRU</th><th class="total-col stacked" rowspan="2">TOTAL</th><th class="net-col stacked" rowspan="2">NET</th></tr><tr>';
-  thead += '<th class="par-label">PAR</th>';
+  thead += '<th class="player-col par-label">PAR</th>';
   for(let i=0;i<18;i++) thead += `<th class="hole-th par-label ${i===8?'hole9end':''}">${state.course.holes[i].par}</th>`;
   thead += '</tr></thead>';
 
