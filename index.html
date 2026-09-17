@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
-<title>Leaders</title>
+<title>Live Leaderboard</title>
+<meta property="og:title" content="Live Leaderboard">
+<meta property="og:description" content="Follow the tournament live, hole by hole.">
+<meta property="og:type" content="website">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
@@ -321,8 +324,14 @@
 
       <div class="section-title">Session</div>
       <div class="card">
-        <p style="font-size:0.78rem;color:#666;margin:0 0 12px;line-height:1.5;">Clearing the board archives everything currently on it (course, groups, and scores) so it can be restored later, then starts a fresh, empty session.</p>
-        <button id="clearBoardBtn" style="background:var(--white);border:1px solid var(--red);color:var(--red);border-radius:7px;padding:10px 16px;font-weight:700;font-size:0.85rem;cursor:pointer;">Clear board (archive current session)</button>
+        <p style="font-size:0.78rem;color:#666;margin:0 0 4px;line-height:1.5;"><strong>Clear scores</strong> — wipes every score so far but keeps your groups, players, and handicaps exactly as they are. Use this to start a new round with the same roster.</p>
+        <button id="clearScoresBtn" style="background:var(--white);border:1px solid #c98a1e;color:#a06b12;border-radius:7px;padding:10px 16px;font-weight:700;font-size:0.85rem;cursor:pointer;">Clear scores (keep groups &amp; players)</button>
+        <div id="clearScoresConfirmArea" style="margin-top:10px;"></div>
+
+        <div style="height:1px;background:var(--grid);margin:18px 0;"></div>
+
+        <p style="font-size:0.78rem;color:#666;margin:0 0 4px;line-height:1.5;"><strong>Clear everything</strong> — wipes the course, every group, and every score. Archives the current session first so it can be restored later.</p>
+        <button id="clearBoardBtn" style="background:var(--white);border:1px solid var(--red);color:var(--red);border-radius:7px;padding:10px 16px;font-weight:700;font-size:0.85rem;cursor:pointer;">Clear everything (archive current session)</button>
         <div id="clearBoardConfirmArea" style="margin-top:10px;"></div>
         <div id="pastSessionsWrap" style="margin-top:16px;"></div>
       </div>
@@ -952,11 +961,13 @@ function renderRoundFormat(){
 }
 
 function renderSessionControls(){
+  const scoresBtn = document.getElementById('clearScoresBtn');
+  const scoresConfirmArea = document.getElementById('clearScoresConfirmArea');
   const clearBtn = document.getElementById('clearBoardBtn');
   const confirmArea = document.getElementById('clearBoardConfirmArea');
   if(!clearBtn) return;
 
-  function doClear(){
+  function archiveSnapshot(){
     const snapshot = {
       id: uid(),
       archivedAt: new Date().toISOString(),
@@ -967,14 +978,63 @@ function renderSessionControls(){
     if(!state.archives) state.archives = [];
     state.archives.unshift(snapshot);
     if(state.archives.length > 10) state.archives = state.archives.slice(0,10);
-    state.groups = [];
-    state.course = { holes: defaultHoles() };
+  }
+
+  function forgetDeviceState(){
     unlockedGroupId = null;
     try{ localStorage.removeItem(LS_GROUP_KEY); }catch(e){}
     try{ localStorage.removeItem(LS_DEVICE_LOGGED_KEY); }catch(e){}
+  }
+
+  function doClearScoresOnly(){
+    archiveSnapshot();
+    state.groups.forEach(g=>{
+      g.currentPos = 0;
+      g.startHole = null;
+      g.players.forEach(p=>{ p.scores = Array(18).fill(null); });
+    });
+    forgetDeviceState();
+    scoresConfirmArea.innerHTML = '';
+    saveSoon(); renderAll();
+  }
+
+  function doClearEverything(){
+    archiveSnapshot();
+    state.groups = [];
+    state.course = { holes: defaultHoles() };
+    forgetDeviceState();
     confirmArea.innerHTML = '';
     saveSoon(); renderAll();
   }
+
+  scoresBtn.onclick = ()=>{
+    scoresConfirmArea.innerHTML = `
+      <div style="border:1px solid #c98a1e;border-radius:8px;padding:12px;background:#fff9ef;">
+        <p style="font-size:0.8rem;color:#8a5c0e;margin:0 0 10px;line-height:1.4;">This wipes every score for every group (safely archived first) but keeps all your groups, players, and handicaps. Enter the admin PIN to confirm.</p>
+        <div class="new-group-row">
+          <input type="password" inputmode="numeric" id="clearScoresPin" placeholder="Admin PIN" style="width:140px;">
+          <button id="clearScoresConfirmBtn" style="background:#c98a1e;">Confirm clear</button>
+          <button id="clearScoresCancelBtn" style="background:none;color:#888;text-decoration:underline;border:none;">Cancel</button>
+        </div>
+        <div id="clearScoresPinError" style="color:var(--red);font-size:0.75rem;margin-top:8px;"></div>
+      </div>`;
+    document.getElementById('clearScoresPin').focus();
+    const attemptConfirm = ()=>{
+      const pin = document.getElementById('clearScoresPin').value.trim();
+      if(!state.adminPin){
+        document.getElementById('clearScoresPinError').textContent = 'No admin PIN is set — set one above first.';
+        return;
+      }
+      if(pin !== state.adminPin){
+        document.getElementById('clearScoresPinError').textContent = 'Wrong PIN.';
+        return;
+      }
+      doClearScoresOnly();
+    };
+    document.getElementById('clearScoresConfirmBtn').addEventListener('click', attemptConfirm);
+    document.getElementById('clearScoresPin').addEventListener('keydown', e=>{ if(e.key==='Enter') attemptConfirm(); });
+    document.getElementById('clearScoresCancelBtn').addEventListener('click', ()=>{ scoresConfirmArea.innerHTML=''; });
+  };
 
   clearBtn.onclick = ()=>{
     confirmArea.innerHTML = `
@@ -998,7 +1058,7 @@ function renderSessionControls(){
         document.getElementById('clearBoardPinError').textContent = 'Wrong PIN.';
         return;
       }
-      doClear();
+      doClearEverything();
     };
     document.getElementById('clearBoardConfirmBtn').addEventListener('click', attemptConfirm);
     document.getElementById('clearBoardPin').addEventListener('keydown', e=>{ if(e.key==='Enter') attemptConfirm(); });
