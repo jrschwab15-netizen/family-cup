@@ -240,7 +240,8 @@
 
   <!-- ADMIN -->
   <div class="view" id="view-admin">
-    <div id="adminArea">
+    <div id="adminLockArea"></div>
+    <div id="adminArea" style="display:none;">
       <div class="section-title">Course scorecard</div>
       <div class="card">
         <p style="font-size:0.78rem;color:#666;margin:0 0 4px;line-height:1.5;">Enter Par and Stroke Index (the "handicap" row) for each hole, straight off the real scorecard. Stroke Index 1 = hardest hole, 18 = easiest — this is what makes net scoring fair across groups.</p>
@@ -278,11 +279,11 @@
 /* =========================================================
    SUPABASE CONFIG — fill these in after you create your project
    ========================================================= */
-const SUPABASE_URL = 'https://hlecesfwreysyoiatzuz.supabase.co/rest/v1/';
+const SUPABASE_URL = 'https://hlecesfwreysyoiatzuz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_W3qyJ_rOjQ_eG04qomBt1g_HyGn_F2k';
 const ROW_ID = 'main';
 const LS_GROUP_KEY = 'familyCupUnlockedGroupId';
-const CONFIGURED = SUPABASE_URL !== 'https://hlecesfwreysyoiatzuz.supabase.co/rest/v1/' && SUPABASE_ANON_KEY !== 'sb_publishable_W3qyJ_rOjQ_eG04qomBt1g_HyGn_F2k';
+const CONFIGURED = SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY';
 let sb = null; // named sb, not "supabase" — the CDN library itself declares a global called "supabase", and redeclaring that name here throws a syntax error that kills the whole script
 if(CONFIGURED){
   try{ sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }
@@ -295,10 +296,12 @@ function defaultHoles(){
 
 let state = {
   tournamentName: 'Family Cup',
+  adminPin: null,
   course: { holes: defaultHoles() },
   groups: [] // {id, name, startHole, players:[{id,name,hcp,scores[18]}]}
 };
 let unlockedGroupId = null;
+let adminUnlocked = false;
 let dirty = false;
 let lastSavedJSON = '';
 
@@ -734,9 +737,44 @@ function renderAdminGroupList(){
   });
 }
 
+function renderAdminLock(){
+  const wrap = document.getElementById('adminLockArea');
+  const area = document.getElementById('adminArea');
+  if(adminUnlocked){ wrap.innerHTML=''; area.style.display='block'; return; }
+  area.style.display='none';
+
+  if(!state.adminPin){
+    wrap.innerHTML = `<div class="lock-panel"><p>No admin PIN is set yet. Set one now — you'll need it to get back into this tab, including on other devices.</p>
+      <div class="new-group-row"><input class="gpin" id="setAdminPin" placeholder="New admin PIN" inputmode="numeric" maxlength="6" style="width:140px;"><button id="setAdminPinBtn">Set PIN</button></div>
+      <div id="setAdminPinError" style="color:var(--red);font-size:0.75rem;margin-top:8px;"></div></div>`;
+    const doSet = ()=>{
+      const pin = document.getElementById('setAdminPin').value.trim();
+      if(!pin){ document.getElementById('setAdminPinError').textContent = 'Enter a PIN.'; return; }
+      state.adminPin = pin; adminUnlocked = true;
+      saveSoon(); renderAdmin();
+    };
+    document.getElementById('setAdminPinBtn').addEventListener('click', doSet);
+    document.getElementById('setAdminPin').addEventListener('keydown', e=>{ if(e.key==='Enter') doSet(); });
+  } else {
+    wrap.innerHTML = `<div class="lock-panel"><p>Enter the admin PIN to set up the tournament.</p>
+      <div class="new-group-row"><input class="gpin" id="enterAdminPin" placeholder="Admin PIN" inputmode="numeric" maxlength="6" style="width:140px;"><button id="enterAdminPinBtn">Unlock</button></div>
+      <div id="enterAdminPinError" style="color:var(--red);font-size:0.75rem;margin-top:8px;"></div></div>`;
+    const doUnlock = ()=>{
+      const pin = document.getElementById('enterAdminPin').value.trim();
+      if(pin === state.adminPin){ adminUnlocked = true; renderAdmin(); }
+      else document.getElementById('enterAdminPinError').textContent = 'Wrong PIN.';
+    };
+    document.getElementById('enterAdminPinBtn').addEventListener('click', doUnlock);
+    document.getElementById('enterAdminPin').addEventListener('keydown', e=>{ if(e.key==='Enter') doUnlock(); });
+  }
+}
+
 function renderAdmin(){
-  renderScorecardGrid();
-  renderAdminGroupList();
+  renderAdminLock();
+  if(adminUnlocked){
+    renderScorecardGrid();
+    renderAdminGroupList();
+  }
 }
 
 document.getElementById('adminAddGroupBtn').addEventListener('click', ()=>{
