@@ -43,9 +43,9 @@
      (set above) is what makes sticky render correctly in Safari; collapse breaks it. */
   th.rank-col, td.rank-col{width:34px;min-width:34px;max-width:34px;position:sticky;left:0;z-index:2;}
   th.player-col, td.player-col{width:118px;min-width:118px;max-width:118px;text-align:left;overflow:hidden;text-overflow:ellipsis;position:sticky;left:34px;z-index:2;}
-  th.thru-col, td.thru-col{width:44px;min-width:44px;max-width:44px;position:sticky;right:88px;z-index:2;}
-  th.total-col, td.total-col{width:42px;min-width:42px;max-width:42px;position:sticky;right:46px;z-index:2;}
-  th.net-col, td.net-col{width:46px;min-width:46px;max-width:46px;position:sticky;right:0;z-index:2;}
+  th.thru-col, td.thru-col{width:44px;min-width:44px;max-width:44px;}
+  th.total-col, td.total-col{width:42px;min-width:42px;max-width:42px;}
+  th.net-col, td.net-col{width:46px;min-width:46px;max-width:46px;}
 
   td.rank-col, td.player-col, td.thru-col, td.total-col, td.net-col{background:var(--white);}
   tbody tr:nth-child(even) td.rank-col, tbody tr:nth-child(even) td.player-col,
@@ -179,7 +179,7 @@
      screen in the clubhouse instead of staying pinned at phone width. ===== */
 
   @media (min-width: 700px){
-    .wrap{max-width:920px;padding:26px 20px 0;}
+    .wrap{max-width:1000px;padding:26px 20px 0;}
     .arch{height:96px;}
     .arch h1{font-size:2.3rem;letter-spacing:3px;}
     .subplaque .tname{font-size:1.1rem;}
@@ -190,6 +190,7 @@
     th.rank-col, td.rank-col{width:4%;min-width:0;max-width:none;}
     th.player-col, td.player-col{width:15%;min-width:0;max-width:none;}
     th.hole-th{width:3.2%;}
+    th.hole-th, td.score-cell{padding:8px 2px !important;}
     th.thru-col, td.thru-col{width:6.5%;min-width:0;max-width:none;}
     th.total-col, td.total-col{width:6%;min-width:0;max-width:none;}
     th.net-col, td.net-col{width:8.9%;min-width:0;max-width:none;}
@@ -197,8 +198,8 @@
     td.rank-col{font-size:1.05rem;}
     td.player-col .pn{font-size:0.92rem;}
     td.player-col .gtag{font-size:0.6rem;}
-    td.score-cell{font-size:1.15rem;}
-    .mark-circle, .mark-square{width:30px;height:30px;}
+    td.score-cell{font-size:1.02rem;}
+    .mark-circle, .mark-square{width:22px;height:22px;border-width:1.5px;}
     td.thru-col{font-size:1.05rem;}
     td.total-col{font-size:1.12rem;}
     td.net-col{font-size:1.25rem;}
@@ -217,7 +218,7 @@
   }
 
   @media (min-width: 1100px){
-    .wrap{max-width:1200px;padding:32px 24px 0;}
+    .wrap{max-width:1500px;padding:32px 24px 0;}
     .arch{height:110px;}
     .arch h1{font-size:2.7rem;letter-spacing:4px;}
     table.leader-table th, table.leader-table td{padding:14px 11px;font-size:1.2rem;}
@@ -225,14 +226,15 @@
     th.rank-col, td.rank-col{width:4%;min-width:0;max-width:none;}
     th.player-col, td.player-col{width:15%;min-width:0;max-width:none;}
     th.hole-th{width:3.2%;}
+    th.hole-th, td.score-cell{padding:10px 4px !important;}
     th.thru-col, td.thru-col{width:6.5%;min-width:0;max-width:none;}
     th.total-col, td.total-col{width:6%;min-width:0;max-width:none;}
     th.net-col, td.net-col{width:8.9%;min-width:0;max-width:none;}
     .stacked{font-size:0.68rem !important;}
     td.rank-col{font-size:1.15rem;}
     td.player-col .pn{font-size:1rem;}
-    td.score-cell{font-size:1.3rem;}
-    .mark-circle, .mark-square{width:34px;height:34px;border-width:2.25px;}
+    td.score-cell{font-size:1.2rem;}
+    .mark-circle, .mark-square{width:30px;height:30px;border-width:2px;}
     td.net-col{font-size:1.4rem;}
     .grid-scroll{border-radius:12px;}
     .score-row{padding:18px 6px;}
