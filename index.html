@@ -462,7 +462,7 @@ function renderLeaderboard(){
       const inner = has ? (shapeCls ? `<span class="${shapeCls}">${v}</span>` : v) : '·';
       tbody += `<td class="score-cell ${scoreCls} ${i===8?'hole9end':''}">${inner}</td>`;
     }
-    tbody += `<td class="thru-col">${state.startMode === 'shotgun' ? (r.s.thru + '/18') : r.s.thru}</td>`;
+    tbody += `<td class="thru-col">${state.startMode !== 'standard' ? (r.s.thru + '/18') : r.s.thru}</td>`;
     tbody += `<td class="total-col">${r.s.thru>0?r.s.gross:'—'}</td>`;
     tbody += `<td class="net-col ${netCls}">${r.s.thru>0?fmtToPar(r.s.netToPar):'—'}</td>`;
     tbody += '</tr>';
