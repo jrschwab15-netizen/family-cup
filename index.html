@@ -31,16 +31,27 @@
     .subplaque .sub{font-size:0.58rem;color:#777;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;font-weight:700;}
   .subplaque .sub.err{color:var(--red);}
 
-  .grid-scroll{overflow-x:auto;background:var(--white);border:1px solid var(--grid);border-radius:8px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
-  table.leader-table{border-collapse:collapse;width:100%;}
-  table.leader-table th, table.leader-table td{border:1px solid var(--grid);text-align:center;vertical-align:middle;padding:9px 6px;font-size:0.92rem;white-space:nowrap;}
+  .grid-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;background:var(--white);border:1px solid var(--grid);border-radius:8px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+  table.leader-table{border-collapse:separate;border-spacing:0;width:100%;}
+  table.leader-table th, table.leader-table td{border:1px solid var(--grid);text-align:center;vertical-align:middle;padding:9px 6px;font-size:0.92rem;white-space:nowrap;background:var(--white);}
   table.leader-table thead th{background:var(--white);font-size:0.66rem;text-transform:uppercase;letter-spacing:0.5px;color:#555;font-weight:800;}
   .stacked{writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.55rem !important;letter-spacing:1px;padding:6px 3px !important;}
-  th.rank-col, td.rank-col{min-width:34px;}
-  th.player-col, td.player-col{text-align:left;min-width:118px;max-width:118px;overflow:hidden;text-overflow:ellipsis;}
-  td.rank-col, td.player-col{background:var(--white);}
-  tbody tr:nth-child(even) td.rank-col, tbody tr:nth-child(even) td.player-col{background:var(--rowalt);}
-  th.rank-col, th.player-col{background:var(--white);}
+
+  /* Locked columns on mobile: RANK + PLAYER pinned left, THRU/TOTAL/NET pinned right,
+     so only the 18 hole columns actually scroll. Fixed px widths here are required —
+     position:sticky needs a known offset to pin against. border-collapse:separate
+     (set above) is what makes sticky render correctly in Safari; collapse breaks it. */
+  th.rank-col, td.rank-col{width:34px;min-width:34px;max-width:34px;position:sticky;left:0;z-index:2;}
+  th.player-col, td.player-col{width:118px;min-width:118px;max-width:118px;text-align:left;overflow:hidden;text-overflow:ellipsis;position:sticky;left:34px;z-index:2;}
+  th.thru-col, td.thru-col{width:44px;min-width:44px;max-width:44px;position:sticky;right:88px;z-index:2;}
+  th.total-col, td.total-col{width:42px;min-width:42px;max-width:42px;position:sticky;right:46px;z-index:2;}
+  th.net-col, td.net-col{width:46px;min-width:46px;max-width:46px;position:sticky;right:0;z-index:2;}
+
+  td.rank-col, td.player-col, td.thru-col, td.total-col, td.net-col{background:var(--white);}
+  tbody tr:nth-child(even) td.rank-col, tbody tr:nth-child(even) td.player-col,
+  tbody tr:nth-child(even) td.thru-col, tbody tr:nth-child(even) td.total-col, tbody tr:nth-child(even) td.net-col{background:var(--rowalt);}
+  th.rank-col, th.player-col, th.thru-col, th.total-col, th.net-col{background:var(--white);}
+
   td.rank-col{color:var(--red);font-weight:900;font-size:0.9rem;}
   td.player-col .pn{font-weight:800;text-transform:uppercase;font-size:0.78rem;}
   td.player-col .gtag{display:block;font-size:0.52rem;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;}
@@ -175,11 +186,17 @@
     .subplaque .sub{font-size:0.68rem;}
     table.leader-table th, table.leader-table td{padding:12px 9px;font-size:1.08rem;}
     table.leader-table thead th{font-size:0.72rem;}
+    table.leader-table{table-layout:fixed;}
+    th.rank-col, td.rank-col{width:4%;min-width:0;max-width:none;}
+    th.player-col, td.player-col{width:15%;min-width:0;max-width:none;}
+    th.hole-th{width:3.2%;}
+    th.thru-col, td.thru-col{width:6.5%;min-width:0;max-width:none;}
+    th.total-col, td.total-col{width:6%;min-width:0;max-width:none;}
+    th.net-col, td.net-col{width:8.9%;min-width:0;max-width:none;}
     .stacked{font-size:0.62rem !important;}
     td.rank-col{font-size:1.05rem;}
     td.player-col .pn{font-size:0.92rem;}
     td.player-col .gtag{font-size:0.6rem;}
-    th.player-col, td.player-col{min-width:150px;max-width:170px;}
     td.score-cell{font-size:1.15rem;}
     .mark-circle, .mark-square{width:30px;height:30px;}
     td.thru-col{font-size:1.05rem;}
@@ -205,10 +222,15 @@
     .arch h1{font-size:2.7rem;letter-spacing:4px;}
     table.leader-table th, table.leader-table td{padding:14px 11px;font-size:1.2rem;}
     table.leader-table thead th{font-size:0.78rem;}
+    th.rank-col, td.rank-col{width:4%;min-width:0;max-width:none;}
+    th.player-col, td.player-col{width:15%;min-width:0;max-width:none;}
+    th.hole-th{width:3.2%;}
+    th.thru-col, td.thru-col{width:6.5%;min-width:0;max-width:none;}
+    th.total-col, td.total-col{width:6%;min-width:0;max-width:none;}
+    th.net-col, td.net-col{width:8.9%;min-width:0;max-width:none;}
     .stacked{font-size:0.68rem !important;}
     td.rank-col{font-size:1.15rem;}
     td.player-col .pn{font-size:1rem;}
-    th.player-col, td.player-col{min-width:170px;max-width:190px;}
     td.score-cell{font-size:1.3rem;}
     .mark-circle, .mark-square{width:34px;height:34px;border-width:2.25px;}
     td.net-col{font-size:1.4rem;}
@@ -299,6 +321,7 @@
       <div class="card">
         <p style="font-size:0.78rem;color:#666;margin:0 0 12px;line-height:1.5;">Clearing the board archives everything currently on it (course, groups, and scores) so it can be restored later, then starts a fresh, empty session.</p>
         <button id="clearBoardBtn" style="background:var(--white);border:1px solid var(--red);color:var(--red);border-radius:7px;padding:10px 16px;font-weight:700;font-size:0.85rem;cursor:pointer;">Clear board (archive current session)</button>
+        <div id="clearBoardConfirmArea" style="margin-top:10px;"></div>
         <div id="pastSessionsWrap" style="margin-top:16px;"></div>
       </div>
     </div>
@@ -410,10 +433,10 @@ function renderLeaderboard(){
   let thead = '<thead><tr>';
   thead += '<th class="rank-col stacked" rowspan="2">RANK</th>';
   thead += '<th class="player-col">HOLE</th>';
-  for(let i=1;i<=18;i++) thead += `<th class="${i===9?'hole9end':''}">${i}</th>`;
-  thead += '<th class="stacked" rowspan="2">THRU</th><th class="stacked" rowspan="2">TOTAL</th><th class="stacked" rowspan="2">NET</th></tr><tr>';
+  for(let i=1;i<=18;i++) thead += `<th class="hole-th ${i===9?'hole9end':''}">${i}</th>`;
+  thead += '<th class="thru-col stacked" rowspan="2">THRU</th><th class="total-col stacked" rowspan="2">TOTAL</th><th class="net-col stacked" rowspan="2">NET</th></tr><tr>';
   thead += '<th class="par-label">PAR</th>';
-  for(let i=0;i<18;i++) thead += `<th class="par-label ${i===8?'hole9end':''}">${state.course.holes[i].par}</th>`;
+  for(let i=0;i<18;i++) thead += `<th class="hole-th par-label ${i===8?'hole9end':''}">${state.course.holes[i].par}</th>`;
   thead += '</tr></thead>';
 
   let tbody = '<tbody>';
@@ -439,7 +462,7 @@ function renderLeaderboard(){
       const inner = has ? (shapeCls ? `<span class="${shapeCls}">${v}</span>` : v) : '·';
       tbody += `<td class="score-cell ${scoreCls} ${i===8?'hole9end':''}">${inner}</td>`;
     }
-    tbody += `<td class="thru-col">${r.s.thru}/18</td>`;
+    tbody += `<td class="thru-col">${state.startMode === 'shotgun' ? (r.s.thru + '/18') : r.s.thru}</td>`;
     tbody += `<td class="total-col">${r.s.thru>0?r.s.gross:'—'}</td>`;
     tbody += `<td class="net-col ${netCls}">${r.s.thru>0?fmtToPar(r.s.netToPar):'—'}</td>`;
     tbody += '</tr>';
@@ -928,34 +951,56 @@ function renderRoundFormat(){
 
 function renderSessionControls(){
   const clearBtn = document.getElementById('clearBoardBtn');
+  const confirmArea = document.getElementById('clearBoardConfirmArea');
   if(!clearBtn) return;
 
+  function doClear(){
+    const snapshot = {
+      id: uid(),
+      archivedAt: new Date().toISOString(),
+      tournamentName: state.tournamentName,
+      course: JSON.parse(JSON.stringify(state.course)),
+      groups: JSON.parse(JSON.stringify(state.groups))
+    };
+    if(!state.archives) state.archives = [];
+    state.archives.unshift(snapshot);
+    if(state.archives.length > 10) state.archives = state.archives.slice(0,10);
+    state.groups = [];
+    state.course = { holes: defaultHoles() };
+    unlockedGroupId = null;
+    try{ localStorage.removeItem(LS_GROUP_KEY); }catch(e){}
+    try{ localStorage.removeItem(LS_DEVICE_LOGGED_KEY); }catch(e){}
+    confirmArea.innerHTML = '';
+    saveSoon(); renderAll();
+  }
+
   clearBtn.onclick = ()=>{
-    if(clearBtn.dataset.armed === '1'){
-      const snapshot = {
-        id: uid(),
-        archivedAt: new Date().toISOString(),
-        tournamentName: state.tournamentName,
-        course: JSON.parse(JSON.stringify(state.course)),
-        groups: JSON.parse(JSON.stringify(state.groups))
-      };
-      if(!state.archives) state.archives = [];
-      state.archives.unshift(snapshot);
-      if(state.archives.length > 10) state.archives = state.archives.slice(0,10);
-      state.groups = [];
-      state.course = { holes: defaultHoles() };
-      unlockedGroupId = null;
-      try{ localStorage.removeItem(LS_GROUP_KEY); }catch(e){}
-      try{ localStorage.removeItem(LS_DEVICE_LOGGED_KEY); }catch(e){}
-      clearBtn.dataset.armed = '';
-      clearBtn.textContent = 'Clear board (archive current session)';
-      saveSoon(); renderAll();
-    } else {
-      clearBtn.dataset.armed = '1';
-      clearBtn.textContent = 'Tap again to confirm — this clears the live board';
-      clearTimeout(clearBtn.__armTimer);
-      clearBtn.__armTimer = setTimeout(()=>{ clearBtn.dataset.armed=''; clearBtn.textContent='Clear board (archive current session)'; }, 4000);
-    }
+    confirmArea.innerHTML = `
+      <div style="border:1px solid var(--red);border-radius:8px;padding:12px;background:#fff5f5;">
+        <p style="font-size:0.8rem;color:#a11;margin:0 0 10px;line-height:1.4;">This clears every group and score currently live (safely archived first — nothing is deleted for good). Enter the admin PIN to confirm.</p>
+        <div class="new-group-row">
+          <input type="password" inputmode="numeric" id="clearBoardPin" placeholder="Admin PIN" style="width:140px;">
+          <button id="clearBoardConfirmBtn" style="background:var(--red);">Confirm clear</button>
+          <button id="clearBoardCancelBtn" style="background:none;color:#888;text-decoration:underline;border:none;">Cancel</button>
+        </div>
+        <div id="clearBoardPinError" style="color:var(--red);font-size:0.75rem;margin-top:8px;"></div>
+      </div>`;
+    document.getElementById('clearBoardPin').focus();
+    const attemptConfirm = ()=>{
+      const pin = document.getElementById('clearBoardPin').value.trim();
+      if(!state.adminPin){
+        document.getElementById('clearBoardPinError').textContent = 'No admin PIN is set — set one above first.';
+        return;
+      }
+      if(pin !== state.adminPin){
+        document.getElementById('clearBoardPinError').textContent = 'Wrong PIN.';
+        return;
+      }
+      doClear();
+    };
+    document.getElementById('clearBoardConfirmBtn').addEventListener('click', attemptConfirm);
+    document.getElementById('clearBoardPin').addEventListener('keydown', e=>{ if(e.key==='Enter') attemptConfirm(); });
+    document.getElementById('clearBoardCancelBtn').addEventListener('click', ()=>{ confirmArea.innerHTML=''; });
   };
 
   const wrap = document.getElementById('pastSessionsWrap');
