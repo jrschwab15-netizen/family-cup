@@ -33,8 +33,8 @@
 
   .grid-scroll{overflow-x:auto;background:var(--white);border:1px solid var(--grid);border-radius:8px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
   table.leader-table{border-collapse:collapse;width:100%;}
-  table.leader-table th, table.leader-table td{border:1px solid var(--grid);text-align:center;padding:6px 4px;font-size:0.78rem;white-space:nowrap;}
-  table.leader-table thead th{background:var(--white);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.5px;color:#555;font-weight:800;}
+  table.leader-table th, table.leader-table td{border:1px solid var(--grid);text-align:center;vertical-align:middle;padding:9px 6px;font-size:0.92rem;white-space:nowrap;}
+  table.leader-table thead th{background:var(--white);font-size:0.66rem;text-transform:uppercase;letter-spacing:0.5px;color:#555;font-weight:800;}
   .stacked{writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.55rem !important;letter-spacing:1px;padding:6px 3px !important;}
   th.rank-col, td.rank-col{min-width:34px;}
   th.player-col, td.player-col{text-align:left;min-width:118px;max-width:118px;overflow:hidden;text-overflow:ellipsis;}
@@ -45,19 +45,19 @@
   td.player-col .pn{font-weight:800;text-transform:uppercase;font-size:0.78rem;}
   td.player-col .gtag{display:block;font-size:0.52rem;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;}
   tbody tr:nth-child(even) td{background:var(--rowalt);}
-  td.score-cell{font-family:var(--mono);font-weight:700;font-size:0.85rem;}
+  td.score-cell{font-family:var(--mono);font-weight:700;font-size:1.02rem;}
   td.score-cell.under{color:var(--under-green);}
   td.score-cell.even{color:var(--ink);}
   td.score-cell.over{color:var(--red);}
   td.score-cell.empty{color:transparent;}
-  .mark-circle, .mark-square{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border:1.5px solid currentColor;line-height:1;box-sizing:border-box;}
+  .mark-circle, .mark-square{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border:2px solid currentColor;line-height:1;box-sizing:border-box;font-variant-numeric:tabular-nums;}
   .mark-circle{border-radius:50%;}
   .mark-square{border-radius:2px;}
   th.hole9end, td.hole9end{border-right:3px solid var(--ink);}
   th.par-label, td.par-label-row{font-weight:800;font-size:0.6rem;color:#555;}
-  td.thru-col{font-family:var(--mono);font-weight:700;font-size:0.8rem;color:#333;}
-  td.total-col{font-family:var(--mono);font-weight:800;font-size:0.85rem;color:var(--ink);}
-  td.net-col{font-family:var(--mono);font-weight:900;font-size:0.9rem;}
+  td.thru-col{font-family:var(--mono);font-weight:700;font-size:0.92rem;color:#333;}
+  td.total-col{font-family:var(--mono);font-weight:800;font-size:1rem;color:var(--ink);}
+  td.net-col{font-family:var(--mono);font-weight:900;font-size:1.08rem;}
   td.net-col.under{color:var(--under-green);} td.net-col.even{color:var(--ink);} td.net-col.over{color:var(--red);}
   .empty-board{padding:26px 16px;text-align:center;color:#777;font-size:0.9rem;background:var(--white);border-radius:8px;border:1px solid var(--grid);margin-bottom:16px;}
   .sync-note{text-align:center;font-size:0.65rem;color:#777;margin:6px 0 20px;line-height:1.5;}
@@ -173,17 +173,18 @@
     .arch h1{font-size:2.3rem;letter-spacing:3px;}
     .subplaque .tname{font-size:1.1rem;}
     .subplaque .sub{font-size:0.68rem;}
-    table.leader-table th, table.leader-table td{padding:9px 7px;font-size:0.92rem;}
-    table.leader-table thead th{font-size:0.68rem;}
+    table.leader-table th, table.leader-table td{padding:12px 9px;font-size:1.08rem;}
+    table.leader-table thead th{font-size:0.72rem;}
     .stacked{font-size:0.62rem !important;}
     td.rank-col{font-size:1.05rem;}
     td.player-col .pn{font-size:0.92rem;}
     td.player-col .gtag{font-size:0.6rem;}
     th.player-col, td.player-col{min-width:150px;max-width:170px;}
-    td.score-cell{font-size:1rem;}
-    td.thru-col{font-size:0.9rem;}
-    td.total-col{font-size:0.95rem;}
-    td.net-col{font-size:1.05rem;}
+    td.score-cell{font-size:1.15rem;}
+    .mark-circle, .mark-square{width:30px;height:30px;}
+    td.thru-col{font-size:1.05rem;}
+    td.total-col{font-size:1.12rem;}
+    td.net-col{font-size:1.25rem;}
     .card{padding:18px;}
     .log-panel{padding:24px;}
     .hole-title .hnum{font-size:1.7rem;}
@@ -202,14 +203,15 @@
     .wrap{max-width:1200px;padding:32px 24px 0;}
     .arch{height:110px;}
     .arch h1{font-size:2.7rem;letter-spacing:4px;}
-    table.leader-table th, table.leader-table td{padding:11px 9px;font-size:1.02rem;}
-    table.leader-table thead th{font-size:0.74rem;}
+    table.leader-table th, table.leader-table td{padding:14px 11px;font-size:1.2rem;}
+    table.leader-table thead th{font-size:0.78rem;}
     .stacked{font-size:0.68rem !important;}
     td.rank-col{font-size:1.15rem;}
     td.player-col .pn{font-size:1rem;}
     th.player-col, td.player-col{min-width:170px;max-width:190px;}
-    td.score-cell{font-size:1.1rem;}
-    td.net-col{font-size:1.15rem;}
+    td.score-cell{font-size:1.3rem;}
+    .mark-circle, .mark-square{width:34px;height:34px;border-width:2.25px;}
+    td.net-col{font-size:1.4rem;}
     .grid-scroll{border-radius:12px;}
     .score-row{padding:18px 6px;}
     .prow-name{font-size:1.15rem;}
