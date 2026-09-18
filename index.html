@@ -79,7 +79,7 @@
      (set above) is what makes sticky render correctly in Safari; collapse breaks it. */
   th.rank-col, td.rank-col{width:34px;min-width:34px;max-width:34px;position:sticky;left:0;z-index:2;}
   th.player-col, td.player-col{width:118px;min-width:118px;max-width:118px;text-align:left;overflow:hidden;text-overflow:ellipsis;position:sticky;left:34px;z-index:2;}
-  th.thru-col, td.thru-col{width:44px;min-width:44px;max-width:44px;}
+  th.thru-col, td.thru-col{width:66px;min-width:66px;max-width:66px;padding-left:4px !important;padding-right:4px !important;}
   th.total-col, td.total-col{width:42px;min-width:42px;max-width:42px;}
   th.net-col, td.net-col{width:46px;min-width:46px;max-width:46px;}
 
@@ -99,7 +99,7 @@
   td.score-cell.empty{color:transparent;}
   th.hole9end, td.hole9end{border-right:3px solid var(--ink);}
   th.par-label, td.par-label-row{font-weight:800;font-size:0.6rem;color:#555;}
-  td.thru-col{font-family:var(--mono);font-weight:700;font-size:0.92rem;color:#333;}
+  td.thru-col{font-family:var(--mono);font-weight:700;font-size:0.88rem;color:#333;letter-spacing:-0.25px;font-variant-numeric:tabular-nums;}
   td.total-col{font-family:var(--mono);font-weight:800;font-size:1rem;color:var(--ink);}
   td.net-col{font-family:var(--mono);font-weight:900;font-size:1.08rem;}
   td.net-col.under{color:var(--under-green);} td.net-col.even{color:var(--ink);} td.net-col.over{color:var(--red);}
@@ -147,15 +147,13 @@
   body.log-view .subplaque .tname{display:block;text-align:center;font-size:0.88rem;}
   body.log-view .subplaque .sub{display:none;}
 
-  .score-entry-stage{position:relative;overflow:hidden;border-radius:8px;isolation:isolate;}
   .score-rows{display:flex;flex-direction:column;}
-  /* Report acknowledgement: the panel always starts fully below the player-entry
-     area and is animated with the Web Animations API. Avoiding class/clip-path
-     transitions makes every save begin from the exact same state. */
-  .score-ack-overlay{position:absolute;inset:0;z-index:8;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:var(--under-green);color:var(--white);border-radius:8px;pointer-events:none;transform:translateY(100%);will-change:transform;}
-  .score-ack-check{width:74px;height:74px;border-radius:50%;background:var(--white);color:var(--under-green);display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:900;line-height:1;box-shadow:0 4px 12px rgba(0,0,0,.14);}
-  .score-ack-text{font-family:var(--sans);font-size:1.45rem;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;}
-  .score-ack-sub{font-size:.74rem;font-weight:700;opacity:.9;text-transform:uppercase;letter-spacing:.5px;}
+  /* Simple, non-blocking acknowledgement shown above the hole number after a
+     successful save. It does not cover the score controls or participate in
+     the save flow, so it cannot interrupt Supabase writes or re-rendering. */
+  .reported-banner{display:none;align-items:center;justify-content:center;gap:8px;background:#e8f5ec;border:1px solid var(--under-green);color:var(--under-green);border-radius:9px;padding:8px 12px;margin:0 0 10px;font-family:var(--sans);font-size:.8rem;font-weight:900;letter-spacing:.7px;text-transform:uppercase;}
+  .reported-banner.show{display:flex;}
+  .reported-banner .reported-check{width:23px;height:23px;border-radius:50%;background:var(--under-green);color:var(--white);display:inline-flex;align-items:center;justify-content:center;font-family:var(--sans-reg);font-size:.9rem;font-weight:900;line-height:1;}
   .score-row{display:flex;justify-content:space-between;align-items:center;padding:13px 2px;border-bottom:1px solid var(--grid);}
   .score-row:last-child{border-bottom:none;}
   .prow-name{font-weight:800;text-transform:uppercase;font-size:0.94rem;}
@@ -186,12 +184,9 @@
   .quickpad{display:grid;grid-template-columns:repeat(9,1fr);gap:5px;margin-bottom:14px;}
   .quickpad button{background:var(--cream);border:1px solid var(--grid);color:var(--ink);border-radius:8px;padding:9px 0;font-family:var(--mono);font-size:0.85rem;cursor:pointer;font-weight:700;}
   .quickpad button.selected{background:var(--red);color:var(--white);border-color:var(--red);}
-  .save-next{display:block;width:100%;background:var(--ink);color:var(--white);border:none;border-radius:10px;padding:14px 0;font-size:0.95rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;transition:background .18s ease,transform .18s ease,opacity .18s ease;}
+  .save-next{display:block;width:100%;background:var(--ink);color:var(--white);border:none;border-radius:10px;padding:14px 0;font-size:0.95rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;}
   .save-next:disabled{opacity:0.72;cursor:default;}
-  .save-next.saving{opacity:0.78;}
-  .save-next.reported{background:var(--under-green);opacity:1;animation:reportedPop .42s ease;text-transform:none;font-size:1rem;}
   .save-next.save-failed{background:var(--red);opacity:1;text-transform:none;}
-  @keyframes reportedPop{0%{transform:scale(1);}45%{transform:scale(1.025);}100%{transform:scale(1);}}
   .strip{display:flex;gap:4px;margin-top:16px;overflow-x:auto;padding-bottom:2px;}
   .strip .hchip{flex:0 0 30px;height:30px;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-size:0.62rem;border:1px solid var(--grid);color:#999;cursor:pointer;line-height:1.1;}
   .strip .hchip.filled{background:#fbe6e9;color:var(--red);font-weight:700;}
@@ -482,8 +477,8 @@ let unlockedGroupId = null;
 let adminUnlocked = false;
 let dirty = false;
 let lastSavedJSON = '';
-let scoreAckInProgress = false;
-let queuedRealtimeState = null;
+let reportedBannerVisible = false;
+let reportedBannerTimer = null;
 
 function uid(){ return 'g_' + Math.random().toString(36).slice(2,9); }
 function personUid(){ return 'p_' + Math.random().toString(36).slice(2,9); }
@@ -900,7 +895,8 @@ function renderLog(){
     </div>`;
 
   if(allDone && !isEditing){
-    area.innerHTML = bar + `<div class="no-player">All 18 holes are logged for ${escapeHtml(g.name)}. Check the Leaderboard tab to see how everyone finished — or use Edit hole above if something was mis-scored.</div>`;
+    const finalReported = `<div class="reported-banner ${reportedBannerVisible ? 'show' : ''}" id="reportedBanner" aria-live="polite"><span class="reported-check">✓</span><span>Reported</span></div>`;
+    area.innerHTML = bar + finalReported + `<div class="no-player">All 18 holes are logged for ${escapeHtml(g.name)}. Check the Leaderboard tab to see how everyone finished — or use Edit hole above if something was mis-scored.</div>`;
     document.getElementById('lockOutBtn').addEventListener('click', doSwitchOut);
     wireEditPicker();
     return;
@@ -933,18 +929,14 @@ function renderLog(){
 
   area.innerHTML = bar + `
     <div class="log-panel">
+      <div class="reported-banner ${reportedBannerVisible ? 'show' : ''}" id="reportedBanner" aria-live="polite">
+        <span class="reported-check">✓</span><span>Reported</span>
+      </div>
       <div class="hole-title" style="margin-bottom:10px;">
         <div class="hnum">${isEditing?'EDITING ':''}HOLE ${actualHole}</div>
         <div class="hpar">Par ${holeInfo.par} · Stroke Index ${holeInfo.si}</div>
       </div>
-      <div class="score-entry-stage" id="scoreEntryStage">
-        <div class="score-rows">${rows}</div>
-        <div class="score-ack-overlay" id="scoreAckOverlay" aria-live="polite">
-          <div class="score-ack-check">✓</div>
-          <div class="score-ack-text">Reported</div>
-          <div class="score-ack-sub">Score saved</div>
-        </div>
-      </div>
+      <div class="score-rows">${rows}</div>
       <button class="save-next" id="saveNext" style="margin-top:16px;">${saveLabel}</button>
       ${cancelLink}
     </div>`;
@@ -974,11 +966,8 @@ function renderLog(){
     const previousPos = g.currentPos;
 
     btn.disabled = true;
-    scoreAckInProgress = true;
-    queuedRealtimeState = null;
-    btn.classList.remove('reported','save-failed');
-    btn.classList.add('saving');
-    btn.textContent = 'Reporting…';
+    btn.classList.remove('save-failed');
+    btn.textContent = 'Saving…';
 
     activePlayers.forEach(p=>{ p.scores[holeIdx] = holeDrafts[p.id] !== undefined ? holeDrafts[p.id] : holeInfo.par; });
     if(!isEditing) g.currentPos = pos + 1;
@@ -991,73 +980,32 @@ function renderLog(){
       activePlayers.forEach(p=>{ p.scores[holeIdx] = previousScores.get(p.id); });
       g.currentPos = previousPos;
       dirty = false;
-      scoreAckInProgress = false;
-      queuedRealtimeState = null;
       btn.disabled = false;
-      btn.classList.remove('saving');
       btn.classList.add('save-failed');
       btn.textContent = 'Save failed — tap again';
       return;
     }
 
     markDeviceHasLogged();
-    btn.classList.remove('saving');
-    btn.classList.add('reported');
-    btn.innerHTML = '✓ Reported';
-
-    // Deterministic acknowledgement animation. Reset the panel completely on every
-    // save, slide it up across only the player-entry area, hold for one full
-    // second, then slide it back down before advancing to the next hole.
-    const ack = document.getElementById('scoreAckOverlay');
-    if(ack){
-      ack.getAnimations().forEach(animation => animation.cancel());
-      ack.style.display = 'flex';
-      ack.style.transform = 'translateY(100%)';
-
-      // Force the reset state to paint before starting the entrance animation.
-      await new Promise(resolve => requestAnimationFrame(()=> requestAnimationFrame(resolve)));
-
-      const enterAnimation = ack.animate(
-        [
-          { transform: 'translateY(100%)' },
-          { transform: 'translateY(0%)' }
-        ],
-        { duration: 420, easing: 'cubic-bezier(.22,.8,.26,1)', fill: 'forwards' }
-      );
-      await enterAnimation.finished.catch(()=>{});
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const exitAnimation = ack.animate(
-        [
-          { transform: 'translateY(0%)' },
-          { transform: 'translateY(100%)' }
-        ],
-        { duration: 340, easing: 'cubic-bezier(.7,0,.84,0)', fill: 'forwards' }
-      );
-      await exitAnimation.finished.catch(()=>{});
-
-      ack.getAnimations().forEach(animation => animation.cancel());
-      ack.style.transform = 'translateY(100%)';
-      ack.style.display = 'none';
-    } else {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-
-    scoreAckInProgress = false;
-    if(queuedRealtimeState){
-      state = queuedRealtimeState;
-      normalizeStateShape();
-      lastSavedJSON = JSON.stringify(state);
-      queuedRealtimeState = null;
-    }
-
     editingHolePos = null;
     holeDrafts = {};
+
+    // Show a simple acknowledgement on the next-hole screen. Because this is
+    // independent of the save button and score-entry DOM, Realtime re-renders
+    // cannot interrupt the actual save operation.
+    reportedBannerVisible = true;
+    if(reportedBannerTimer) clearTimeout(reportedBannerTimer);
+    reportedBannerTimer = setTimeout(()=>{
+      reportedBannerVisible = false;
+      const banner = document.getElementById('reportedBanner');
+      if(banner) banner.classList.remove('show');
+    }, 1000);
+
     renderLog();
     renderLeaderboard();
     renderBestBall();
   });
+
   if(isEditing){
     document.getElementById('cancelEdit').addEventListener('click', ()=>{
       editingHolePos = null;
@@ -1638,16 +1586,6 @@ function subscribeRealtime(){
       if(payload.new && payload.new.data && !dirty){
         const incomingState = payload.new.data;
         const incomingJSON = JSON.stringify(incomingState);
-
-        // Do not rebuild the score-entry DOM while the Reported acknowledgement
-        // is on screen. Keep only the newest realtime snapshot and apply it once
-        // the animation finishes. This prevents Supabase's echo of our own save
-        // (or another device's update) from cutting the animation in half.
-        if(scoreAckInProgress){
-          queuedRealtimeState = incomingState;
-          setSyncLabel('synced', false);
-          return;
-        }
 
         // Supabase normally echoes our own successful upsert back through
         // Realtime. If it is byte-for-byte the state we just saved, no UI
