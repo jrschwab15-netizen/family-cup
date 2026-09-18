@@ -18,13 +18,39 @@
     --mono:'Courier New',ui-monospace,SFMono-Regular,Menlo,monospace;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;font-family:var(--sans-reg);color:var(--ink);}
+  html,body{margin:0;padding:0;font-family:var(--sans-reg);color:var(--ink);width:100%;}
+  html{
+    min-height:100%;
+    background:linear-gradient(var(--sky-top), var(--sky-bottom) 120px, var(--cream) 120px, var(--cream) 100%);
+    overscroll-behavior:none;
+  }
   body{
     background:linear-gradient(var(--sky-top), var(--sky-bottom) 120px, var(--cream) 120px, var(--cream) 100%);
-    background-attachment:fixed; min-height:100vh;
+    background-attachment:fixed; min-height:100vh; min-height:100dvh;
     padding:0 0 calc(88px + env(safe-area-inset-bottom));
+    overscroll-behavior-y:none;
   }
-  body.leaderboard-view{padding-bottom:0;overflow:hidden;}
+  /* On the leaderboard, the app shell is pinned to the viewport. Only the
+     scoreboard itself is allowed to scroll. This prevents iOS Safari's
+     pull-down rubber-band from dragging the whole board and exposing the
+     page behind the rounded header corners. */
+  body.leaderboard-view{
+    position:fixed;
+    top:0; left:0; right:0;
+    width:100%;
+    height:100vh; height:100dvh;
+    min-height:0;
+    padding-bottom:0;
+    overflow:hidden;
+    overscroll-behavior:none;
+  }
+  /* Lock the root viewport as well. Desktop trackpads (especially Safari on
+     macOS) can otherwise rubber-band the document even when body is fixed. */
+  html.leaderboard-shell{
+    height:100%;
+    overflow:hidden;
+    overscroll-behavior:none;
+  }
   .wrap{max-width:640px;margin:0 auto;padding:18px 12px 0;}
   .view{display:none;} .view.active{display:block;}
 
@@ -36,7 +62,7 @@
   .subplaque .sub.err{color:var(--red);}
 
   .grid-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;background:var(--white);border:1px solid var(--grid);border-radius:8px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
-  #view-leaderboard .grid-scroll{overflow:auto;overscroll-behavior:contain;margin-bottom:0;scrollbar-gutter:stable;}
+  #view-leaderboard .grid-scroll{overflow:auto;overscroll-behavior:none;margin-bottom:0;scrollbar-gutter:stable;touch-action:pan-x pan-y;}
   table.leader-table{border-collapse:separate;border-spacing:0;width:100%;}
   table.leader-table th, table.leader-table td{border:1px solid var(--grid);text-align:center;vertical-align:middle;padding:9px 6px;font-size:0.92rem;white-space:nowrap;background:var(--white);}
   table.leader-table thead{position:sticky;top:0;z-index:8;}
@@ -1534,6 +1560,86 @@ function queueLeaderboardFit(){
 window.addEventListener('resize', queueLeaderboardFit);
 window.addEventListener('orientationchange', queueLeaderboardFit);
 
+/* ---------- iOS leaderboard overscroll guard ----------
+   Safari can rubber-band the root page even when the scoreboard has its own
+   scroll area. Keep the app shell locked and allow touch movement only inside
+   the scoreboard. At the scoreboard's top/bottom edge, block the extra drag so
+   the rounded header and bottom navigation never pull away from the viewport. */
+let leaderboardTouchX = null;
+let leaderboardTouchY = null;
+
+document.addEventListener('touchstart', e=>{
+  if(!document.body.classList.contains('leaderboard-view') || e.touches.length !== 1){
+    leaderboardTouchX = leaderboardTouchY = null;
+    return;
+  }
+  leaderboardTouchX = e.touches[0].clientX;
+  leaderboardTouchY = e.touches[0].clientY;
+}, {passive:true});
+
+document.addEventListener('touchmove', e=>{
+  if(!document.body.classList.contains('leaderboard-view')) return;
+  if(e.touches.length !== 1){ e.preventDefault(); return; }
+
+  const grid = e.target.closest('#view-leaderboard .grid-scroll');
+  if(!grid){
+    // Header, tournament plaque and bottom navigation stay physically fixed.
+    e.preventDefault();
+    return;
+  }
+
+  const x = e.touches[0].clientX;
+  const y = e.touches[0].clientY;
+  if(leaderboardTouchX === null || leaderboardTouchY === null){
+    leaderboardTouchX = x; leaderboardTouchY = y;
+    return;
+  }
+
+  const dx = x - leaderboardTouchX;
+  const dy = y - leaderboardTouchY;
+  const mostlyVertical = Math.abs(dy) > Math.abs(dx);
+  const atTop = grid.scrollTop <= 0;
+  const atBottom = Math.ceil(grid.scrollTop + grid.clientHeight) >= grid.scrollHeight;
+
+  if(mostlyVertical && ((atTop && dy > 0) || (atBottom && dy < 0))){
+    e.preventDefault();
+  }
+
+  leaderboardTouchX = x;
+  leaderboardTouchY = y;
+}, {passive:false});
+
+document.addEventListener('touchend', ()=>{
+  leaderboardTouchX = leaderboardTouchY = null;
+}, {passive:true});
+document.addEventListener('touchcancel', ()=>{
+  leaderboardTouchX = leaderboardTouchY = null;
+}, {passive:true});
+
+/* Desktop / laptop trackpad overscroll guard.
+   Some browsers can still rubber-band the viewport with a wheel/trackpad
+   gesture even while the page shell is fixed. Keep vertical movement inside
+   the scoreboard and swallow only the extra pull at the top/bottom edge. */
+document.addEventListener('wheel', e=>{
+  if(!document.body.classList.contains('leaderboard-view')) return;
+
+  const grid = e.target.closest('#view-leaderboard .grid-scroll');
+  const verticalGesture = Math.abs(e.deltaY) >= Math.abs(e.deltaX);
+
+  if(!grid){
+    if(verticalGesture && e.deltaY !== 0) e.preventDefault();
+    return;
+  }
+
+  if(!verticalGesture) return; // preserve horizontal trackpad scrolling across holes
+
+  const atTop = grid.scrollTop <= 0;
+  const atBottom = Math.ceil(grid.scrollTop + grid.clientHeight) >= grid.scrollHeight;
+  if((atTop && e.deltaY < 0) || (atBottom && e.deltaY > 0)){
+    e.preventDefault();
+  }
+}, {passive:false});
+
 /* ---------- Tabs ---------- */
 function showView(name){
   document.getElementById('view-leaderboard').classList.toggle('active', name==='leaderboard');
@@ -1543,6 +1649,7 @@ function showView(name){
   document.getElementById('tabLogBtn').classList.toggle('active', name==='log');
   document.getElementById('tabAdminBtn').classList.toggle('active', name==='admin');
   document.body.classList.toggle('leaderboard-view', name==='leaderboard');
+  document.documentElement.classList.toggle('leaderboard-shell', name==='leaderboard');
   if(name==='leaderboard') queueLeaderboardFit();
 }
 document.getElementById('tabLeaderboardBtn').addEventListener('click', ()=>showView('leaderboard'));
@@ -1573,6 +1680,7 @@ document.getElementById('toggleBestBallBtn').addEventListener('click', ()=>showB
   }catch(e){ /* private browsing etc. — just falls back to the picker */ }
   renderAll();
   document.body.classList.add('leaderboard-view');
+  document.documentElement.classList.add('leaderboard-shell');
   queueLeaderboardFit();
   subscribeRealtime();
 })();
