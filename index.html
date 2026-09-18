@@ -61,8 +61,15 @@
   .subplaque{background:var(--white);border-top:2px solid var(--grid);padding:8px 16px 10px;display:flex;justify-content:space-between;align-items:center;gap:10px;box-shadow:0 3px 8px rgba(0,0,0,0.1);margin-bottom:10px;border-radius:0 0 6px 6px;}
   .subplaque .tname{color:var(--ink);font-family:var(--sans);font-weight:900;font-size:0.95rem;letter-spacing:0.5px;text-transform:uppercase;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   body.leaderboard-view .subplaque .tname{display:none;}
-    .subplaque .sub{font-size:0.58rem;color:#777;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;font-weight:700;margin-left:auto;}
+    .subplaque .sub{font-size:0.58rem;color:#777;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;font-weight:700;}
   .subplaque .sub.err{color:var(--red);}
+  .live-controls{display:flex;align-items:center;gap:7px;margin-left:auto;flex:0 0 auto;}
+  .refresh-live-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;background:var(--white);border:1px solid var(--grid);color:#666;border-radius:16px;padding:5px 9px;font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.35px;cursor:pointer;line-height:1;}
+  .refresh-live-btn:active{background:var(--cream);}
+  .refresh-live-btn:disabled{opacity:0.55;cursor:default;}
+  .refresh-live-btn .refresh-icon{font-size:0.9rem;line-height:1;display:inline-block;}
+  .refresh-live-btn.refreshing .refresh-icon{animation:refreshSpin .7s linear infinite;}
+  @keyframes refreshSpin{to{transform:rotate(360deg);}}
 
   .grid-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;background:var(--white);border:1px solid var(--grid);border-radius:8px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
   #view-leaderboard .grid-scroll{overflow:auto;overscroll-behavior:none;margin-bottom:0;scrollbar-gutter:stable;touch-action:pan-x pan-y;}
@@ -145,7 +152,7 @@
   body.log-view .wrap{padding-top:7px;}
   body.log-view .subplaque{border-top:0;border-radius:8px;padding:9px 12px;margin-bottom:8px;box-shadow:0 2px 6px rgba(0,0,0,0.08);}
   body.log-view .subplaque .tname{display:block;text-align:center;font-size:0.88rem;}
-  body.log-view .subplaque .sub{display:none;}
+  body.log-view .live-controls{display:none;}
 
   .score-rows{display:flex;flex-direction:column;}
   /* Simple, non-blocking acknowledgement shown above the hole number after a
@@ -335,7 +342,10 @@
       <button id="toggleIndividualBtn" class="active">Individual</button>
       <button id="toggleBestBallBtn">Best Ball</button>
     </div>
-    <div class="sub" id="syncTime">connecting…</div>
+    <div class="live-controls">
+      <div class="sub" id="syncTime">connecting…</div>
+      <button class="refresh-live-btn" id="refreshLiveBtn" type="button" aria-label="Refresh live leaderboard" title="Refresh live leaderboard"><span class="refresh-icon">↻</span><span>Refresh</span></button>
+    </div>
   </div>
 
   <!-- LEADERBOARD -->
@@ -1579,6 +1589,45 @@ async function loadInitial(){
     setSyncLabel('live', false);
   }catch(err){ console.error('load failed', err); setSyncLabel('setup needed — see console', true); }
 }
+async function refreshLiveState(){
+  const btn = document.getElementById('refreshLiveBtn');
+  if(!sb){ setSyncLabel('preview mode — add Supabase keys', true); return; }
+  if(btn && btn.disabled) return;
+
+  if(btn){
+    btn.disabled = true;
+    btn.classList.add('refreshing');
+  }
+  setSyncLabel('refreshing', false);
+
+  try{
+    // If another admin control has a pending debounced save, push that first so
+    // a manual refresh can never overwrite the browser's own unsaved state.
+    if(dirty){
+      clearTimeout(window.__saveTimer);
+      const saved = await saveNow();
+      if(!saved) throw new Error('Pending local changes could not be saved before refresh.');
+    }
+
+    const { data, error } = await sb.from('tournament_state').select('data').eq('id', ROW_ID).single();
+    if(error) throw error;
+    if(data && data.data){
+      state = data.data;
+      normalizeStateShape();
+      lastSavedJSON = JSON.stringify(state);
+      renderAll();
+    }
+    setSyncLabel('live', false);
+  }catch(err){
+    console.error('manual refresh failed', err);
+    setSyncLabel('refresh failed', true);
+  }finally{
+    if(btn){
+      btn.disabled = false;
+      btn.classList.remove('refreshing');
+    }
+  }
+}
 function subscribeRealtime(){
   if(!sb) return;
   sb.channel('tournament_state_changes')
@@ -1747,6 +1796,7 @@ function showBoardMode(mode){
 }
 document.getElementById('toggleIndividualBtn').addEventListener('click', ()=>showBoardMode('individual'));
 document.getElementById('toggleBestBallBtn').addEventListener('click', ()=>showBoardMode('bestball'));
+document.getElementById('refreshLiveBtn').addEventListener('click', refreshLiveState);
 
 
 
