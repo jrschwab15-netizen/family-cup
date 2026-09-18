@@ -557,7 +557,8 @@ function renderBestBall(){
         const par = state.course.holes[i].par;
         const diff = b.net - par;
         const cls = diff<0 ? 'under' : (diff>0 ? 'over' : 'even');
-        tbody += `<td class="bb-cell ${cls} ${i===8?'hole9end':''}"><div class="bb-num">${b.net}</div><div class="bb-who">${escapeHtml(b.names.join(', '))}</div></td>`;
+        const whoText = b.names.length > 1 ? '(tie)' : b.names[0];
+        tbody += `<td class="bb-cell ${cls} ${i===8?'hole9end':''}"><div class="bb-num">${b.net}</div><div class="bb-who">${escapeHtml(whoText)}</div></td>`;
       }
     }
     tbody += `<td class="thru-col">${r.thru}/18</td>`;
