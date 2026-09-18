@@ -82,6 +82,9 @@
   td.bb-cell.empty{color:transparent;}
   .empty-board{padding:26px 16px;text-align:center;color:#777;font-size:0.9rem;background:var(--white);border-radius:8px;border:1px solid var(--grid);margin-bottom:16px;}
   .sync-note{text-align:center;font-size:0.65rem;color:#777;margin:6px 0 20px;line-height:1.5;}
+  .board-toggle{display:flex;justify-content:center;gap:8px;margin:14px 0 4px;}
+  .board-toggle button{background:var(--white);border:1px solid var(--grid);color:#666;border-radius:20px;padding:9px 20px;font-size:0.82rem;font-weight:700;cursor:pointer;}
+  .board-toggle button.active{background:var(--ink);color:var(--white);border-color:var(--ink);}
 
   .section-title{font-size:0.68rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--red);margin:0 0 8px 2px;font-weight:800;}
   .card{background:var(--white);border:1px solid var(--grid);border-radius:10px;padding:14px;margin-bottom:18px;box-shadow:0 2px 6px rgba(0,0,0,0.06);}
@@ -269,13 +272,12 @@
   <!-- LEADERBOARD -->
   <div class="view active" id="view-leaderboard">
     <div id="boardWrap"></div>
-    <div class="sync-note">Live from the course — updates the instant a group's scorer logs a hole. Safe to leave open in the clubhouse.</div>
-  </div>
-
-  <!-- BEST BALL -->
-  <div class="view" id="view-bestball">
-    <div id="bestBallWrap"></div>
-    <div class="sync-note">Best (handicap-adjusted) score per hole for each group, with who posted it.</div>
+    <div id="bestBallWrap" style="display:none;"></div>
+    <div class="board-toggle">
+      <button id="toggleIndividualBtn" class="active">Individual</button>
+      <button id="toggleBestBallBtn">Best Ball</button>
+    </div>
+    <div class="sync-note" id="boardSyncNote">Live from the course — updates the instant a group's scorer logs a hole. Safe to leave open in the clubhouse.</div>
   </div>
 
   <!-- LOG SCORE -->
@@ -354,10 +356,9 @@
 </div>
 
 <div class="tabbar">
-  <button id="tabLeaderboardBtn" class="active">Individual</button>
-  <button id="tabBestBallBtn">Best Ball</button>
-  <button id="tabLogBtn">Log Score</button>
-  <button id="tabAdminBtn">Admin</button>
+  <button id="tabLeaderboardBtn" class="active"><span class="ic">🏆</span>Leaderboard</button>
+  <button id="tabLogBtn"><span class="ic">⛳</span>Log Score</button>
+  <button id="tabAdminBtn"><span class="ic">🛠️</span>Admin</button>
 </div>
 
 <script>
@@ -547,7 +548,7 @@ function renderBestBall(){
     const netCls = r.netToPar<0 ? 'under' : (r.netToPar>0 ? 'over' : 'even');
     tbody += '<tr>';
     tbody += `<td class="rank-col">${idx+1}</td>`;
-    tbody += `<td class="player-col"><span class="pn">${escapeHtml(r.g.name)}${isLeader?' 🏆':''}</span></td>`;
+    tbody += `<td class="player-col"><span class="pn">${escapeHtml(r.g.name)}${isLeader?' 🏆':''}</span><span class="gtag">${escapeHtml(r.g.players.map(p=>p.name).join(', '))}</span></td>`;
     for(let i=0;i<18;i++){
       const b = r.holeBest[i];
       if(!b){
@@ -1284,18 +1285,29 @@ function setSyncLabel(txt, isErr){
 /* ---------- Tabs ---------- */
 function showView(name){
   document.getElementById('view-leaderboard').classList.toggle('active', name==='leaderboard');
-  document.getElementById('view-bestball').classList.toggle('active', name==='bestball');
   document.getElementById('view-log').classList.toggle('active', name==='log');
   document.getElementById('view-admin').classList.toggle('active', name==='admin');
   document.getElementById('tabLeaderboardBtn').classList.toggle('active', name==='leaderboard');
-  document.getElementById('tabBestBallBtn').classList.toggle('active', name==='bestball');
   document.getElementById('tabLogBtn').classList.toggle('active', name==='log');
   document.getElementById('tabAdminBtn').classList.toggle('active', name==='admin');
 }
 document.getElementById('tabLeaderboardBtn').addEventListener('click', ()=>showView('leaderboard'));
-document.getElementById('tabBestBallBtn').addEventListener('click', ()=>showView('bestball'));
 document.getElementById('tabLogBtn').addEventListener('click', ()=>showView('log'));
 document.getElementById('tabAdminBtn').addEventListener('click', ()=>{ showView('admin'); renderAdmin(); });
+
+let boardMode = 'individual'; // 'individual' | 'bestball' — which board shows inside the Leaderboard tab
+function showBoardMode(mode){
+  boardMode = mode;
+  document.getElementById('boardWrap').style.display = mode==='individual' ? 'block' : 'none';
+  document.getElementById('bestBallWrap').style.display = mode==='bestball' ? 'block' : 'none';
+  document.getElementById('toggleIndividualBtn').classList.toggle('active', mode==='individual');
+  document.getElementById('toggleBestBallBtn').classList.toggle('active', mode==='bestball');
+  document.getElementById('boardSyncNote').textContent = mode==='individual'
+    ? "Live from the course — updates the instant a group's scorer logs a hole. Safe to leave open in the clubhouse."
+    : "Best (handicap-adjusted) score per hole for each group, with who posted it.";
+}
+document.getElementById('toggleIndividualBtn').addEventListener('click', ()=>showBoardMode('individual'));
+document.getElementById('toggleBestBallBtn').addEventListener('click', ()=>showBoardMode('bestball'));
 
 
 
