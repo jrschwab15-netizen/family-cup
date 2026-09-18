@@ -20,10 +20,11 @@
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;font-family:var(--sans-reg);color:var(--ink);}
   body{
-    background:linear-gradient(var(--sky-top), var(--sky-bottom) 120px, var(--cream) 120px, var(--cream) calc(100% - 10px), var(--grass) calc(100% - 10px));
+    background:linear-gradient(var(--sky-top), var(--sky-bottom) 120px, var(--cream) 120px, var(--cream) 100%);
     background-attachment:fixed; min-height:100vh;
-    padding:0 0 calc(78px + env(safe-area-inset-bottom));
+    padding:0 0 calc(88px + env(safe-area-inset-bottom));
   }
+  body.leaderboard-view{padding-bottom:0;overflow:hidden;}
   .wrap{max-width:640px;margin:0 auto;padding:18px 12px 0;}
   .view{display:none;} .view.active{display:block;}
 
@@ -35,9 +36,12 @@
   .subplaque .sub.err{color:var(--red);}
 
   .grid-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;background:var(--white);border:1px solid var(--grid);border-radius:8px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+  #view-leaderboard .grid-scroll{overflow:auto;overscroll-behavior:contain;margin-bottom:0;scrollbar-gutter:stable;}
   table.leader-table{border-collapse:separate;border-spacing:0;width:100%;}
   table.leader-table th, table.leader-table td{border:1px solid var(--grid);text-align:center;vertical-align:middle;padding:9px 6px;font-size:0.92rem;white-space:nowrap;background:var(--white);}
-  table.leader-table thead th{background:var(--white);font-size:0.66rem;text-transform:uppercase;letter-spacing:0.5px;color:#555;font-weight:800;}
+  table.leader-table thead{position:sticky;top:0;z-index:8;}
+  table.leader-table thead th{background:var(--white);font-size:0.66rem;text-transform:uppercase;letter-spacing:0.5px;color:#555;font-weight:800;box-shadow:0 1px 0 var(--grid);}
+  table.leader-table thead th.rank-col, table.leader-table thead th.player-col{z-index:10;}
   .stacked{writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.55rem !important;letter-spacing:1px;padding:6px 3px !important;}
 
   /* Locked columns on mobile: RANK + PLAYER pinned left, THRU/TOTAL/NET pinned right,
@@ -78,8 +82,8 @@
   td.bb-cell.over .bb-num{color:var(--red);}
   td.bb-cell.empty{color:transparent;}
   .empty-board{padding:26px 16px;text-align:center;color:#777;font-size:0.9rem;background:var(--white);border-radius:8px;border:1px solid var(--grid);margin-bottom:16px;}
-  .sync-note{text-align:center;font-size:0.65rem;color:#777;margin:6px 0 20px;line-height:1.5;}
-  .board-toggle{display:flex;justify-content:center;gap:8px;margin:14px 0 4px;}
+  .sync-note{text-align:center;font-size:0.65rem;color:#777;margin:4px 0 10px;line-height:1.5;}
+  .board-toggle{display:flex;justify-content:center;gap:8px;margin:0 0 6px;padding:0 0 2px;}
   .board-toggle button{background:var(--white);border:1px solid var(--grid);color:#666;border-radius:20px;padding:9px 20px;font-size:0.82rem;font-weight:700;cursor:pointer;}
   .board-toggle button.active{background:var(--ink);color:var(--white);border-color:var(--ink);}
 
@@ -194,8 +198,8 @@
   .person-assignment{display:block;color:#999;font-size:0.65rem;margin-top:2px;}
   .admin-primary{background:var(--red);color:var(--white);border:none;border-radius:8px;padding:10px 14px;font-size:0.84rem;font-weight:800;cursor:pointer;}
 
-  .tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--white);border-top:1px solid var(--grid);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:10;}
-  .tabbar button{flex:1;background:none;border:none;color:#999;padding:12px 0 10px;font-size:0.64rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;}
+  .tabbar{position:fixed;left:0;right:0;bottom:0;width:100%;background:var(--white);border-top:10px solid var(--grass);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:50;box-shadow:0 -3px 10px rgba(0,0,0,0.12);}
+  .tabbar button{flex:1;background:var(--white);border:none;color:#999;padding:12px 0 10px;font-size:0.64rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;}
   .tabbar button .ic{font-size:1.2rem;}
   .tabbar button.active{color:var(--red);}
 
@@ -267,7 +271,7 @@
     .prow-val{font-size:1.8rem;}
     .log-panel{max-width:680px;margin:0 auto;padding:30px;}
     .lock-panel, .group-lock{max-width:680px;margin:0 auto;padding:28px;}
-    .tabbar{max-width:1200px;left:50%;transform:translateX(-50%);border-radius:12px 12px 0 0;}
+    .tabbar{max-width:none;left:0;right:0;transform:none;border-radius:0;}
   }
 </style>
 </head>
@@ -282,13 +286,13 @@
 
   <!-- LEADERBOARD -->
   <div class="view active" id="view-leaderboard">
-    <div id="boardWrap"></div>
-    <div id="bestBallWrap" style="display:none;"></div>
     <div class="board-toggle">
       <button id="toggleIndividualBtn" class="active">Individual</button>
       <button id="toggleBestBallBtn">Best Ball</button>
     </div>
     <div class="sync-note" id="boardSyncNote">Live from the course — updates the instant a group's scorer logs a hole. Safe to leave open in the clubhouse.</div>
+    <div id="boardWrap"></div>
+    <div id="bestBallWrap" style="display:none;"></div>
   </div>
 
   <!-- LOG SCORE -->
@@ -588,6 +592,7 @@ function renderLeaderboard(){
   });
   tbody += '</tbody>';
   wrap.innerHTML = `<div class="grid-scroll"><table class="leader-table">${thead}${tbody}</table></div>`;
+  queueLeaderboardFit();
 }
 
 /* ---------- Best Ball: for each group, the best handicap-adjusted score per
@@ -661,6 +666,7 @@ function renderBestBall(){
   });
   tbody += '</tbody>';
   wrap.innerHTML = `<div class="grid-scroll"><table class="leader-table">${thead}${tbody}</table></div>`;
+  queueLeaderboardFit();
 }
 
 /* ---------- Log Score: pick pre-made group, shotgun start, one hole at a time for the whole group ---------- */
@@ -1448,6 +1454,7 @@ function renderAll(){
   renderBestBall();
   renderLog();
   renderAdmin();
+  queueLeaderboardFit();
 }
 
 /* ---------- Persistence: Supabase (realtime) ---------- */
@@ -1497,6 +1504,34 @@ function setSyncLabel(txt, isErr){
   el.classList.toggle('err', !!isErr);
 }
 
+/* ---------- Leaderboard viewport sizing ---------- */
+function fitLeaderboardGrid(){
+  const view = document.getElementById('view-leaderboard');
+  if(!view || !view.classList.contains('active')) return;
+
+  const visibleWrap = boardMode === 'bestball'
+    ? document.getElementById('bestBallWrap')
+    : document.getElementById('boardWrap');
+  const grid = visibleWrap ? visibleWrap.querySelector('.grid-scroll') : null;
+  const nav = document.querySelector('.tabbar');
+  if(!grid || !nav) return;
+
+  // Keep the scrolling scoreboard fully above the fixed bottom navigation.
+  // The top controls and tournament branding remain visible while only the
+  // player rows scroll, which is important with a 20+ person field.
+  const gridTop = grid.getBoundingClientRect().top;
+  const navTop = nav.getBoundingClientRect().top;
+  const available = Math.max(180, Math.floor(navTop - gridTop - 10));
+  grid.style.maxHeight = available + 'px';
+}
+
+function queueLeaderboardFit(){
+  requestAnimationFrame(()=>requestAnimationFrame(fitLeaderboardGrid));
+}
+
+window.addEventListener('resize', queueLeaderboardFit);
+window.addEventListener('orientationchange', queueLeaderboardFit);
+
 /* ---------- Tabs ---------- */
 function showView(name){
   document.getElementById('view-leaderboard').classList.toggle('active', name==='leaderboard');
@@ -1505,6 +1540,8 @@ function showView(name){
   document.getElementById('tabLeaderboardBtn').classList.toggle('active', name==='leaderboard');
   document.getElementById('tabLogBtn').classList.toggle('active', name==='log');
   document.getElementById('tabAdminBtn').classList.toggle('active', name==='admin');
+  document.body.classList.toggle('leaderboard-view', name==='leaderboard');
+  if(name==='leaderboard') queueLeaderboardFit();
 }
 document.getElementById('tabLeaderboardBtn').addEventListener('click', ()=>showView('leaderboard'));
 document.getElementById('tabLogBtn').addEventListener('click', ()=>showView('log'));
@@ -1520,6 +1557,7 @@ function showBoardMode(mode){
   document.getElementById('boardSyncNote').textContent = mode==='individual'
     ? "Live from the course — updates the instant a group's scorer logs a hole. Safe to leave open in the clubhouse."
     : "Best (handicap-adjusted) score per hole for each group, with who posted it.";
+  queueLeaderboardFit();
 }
 document.getElementById('toggleIndividualBtn').addEventListener('click', ()=>showBoardMode('individual'));
 document.getElementById('toggleBestBallBtn').addEventListener('click', ()=>showBoardMode('bestball'));
@@ -1535,6 +1573,8 @@ document.getElementById('toggleBestBallBtn').addEventListener('click', ()=>showB
     if(savedId && findGroup(savedId)) unlockedGroupId = savedId;
   }catch(e){ /* private browsing etc. — just falls back to the picker */ }
   renderAll();
+  document.body.classList.add('leaderboard-view');
+  queueLeaderboardFit();
   subscribeRealtime();
 })();
 </script>
