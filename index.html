@@ -147,15 +147,15 @@
   body.log-view .subplaque .tname{display:block;text-align:center;font-size:0.88rem;}
   body.log-view .subplaque .sub{display:none;}
 
-  .score-entry-stage{position:relative;}
+  .score-entry-stage{position:relative;overflow:hidden;border-radius:8px;isolation:isolate;}
   .score-rows{display:flex;flex-direction:column;}
-  .score-ack-overlay{position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:var(--under-green);color:var(--white);border-radius:8px;pointer-events:none;opacity:0;clip-path:inset(100% 0 0 0 round 8px);transition:clip-path .34s cubic-bezier(.22,.8,.26,1),opacity .12s ease;}
-  .score-ack-overlay.show{opacity:1;clip-path:inset(0 0 0 0 round 8px);}
-  .score-ack-overlay.collapse{opacity:1;clip-path:inset(100% 0 0 0 round 8px);transition:clip-path .28s cubic-bezier(.7,0,.84,0),opacity .08s linear .23s;}
-  .score-ack-check{width:70px;height:70px;border-radius:50%;background:var(--white);color:var(--under-green);display:flex;align-items:center;justify-content:center;font-size:2.8rem;font-weight:900;line-height:1;box-shadow:0 4px 12px rgba(0,0,0,.14);transform:scale(.84);transition:transform .3s ease .12s;}
-  .score-ack-overlay.show .score-ack-check{transform:scale(1);}
-  .score-ack-text{font-family:var(--sans);font-size:1.35rem;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;}
-  .score-ack-sub{font-size:.72rem;font-weight:700;opacity:.9;text-transform:uppercase;letter-spacing:.5px;}
+  /* Report acknowledgement: the panel always starts fully below the player-entry
+     area and is animated with the Web Animations API. Avoiding class/clip-path
+     transitions makes every save begin from the exact same state. */
+  .score-ack-overlay{position:absolute;inset:0;z-index:8;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:var(--under-green);color:var(--white);border-radius:8px;pointer-events:none;transform:translateY(100%);will-change:transform;}
+  .score-ack-check{width:74px;height:74px;border-radius:50%;background:var(--white);color:var(--under-green);display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:900;line-height:1;box-shadow:0 4px 12px rgba(0,0,0,.14);}
+  .score-ack-text{font-family:var(--sans);font-size:1.45rem;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;}
+  .score-ack-sub{font-size:.74rem;font-weight:700;opacity:.9;text-transform:uppercase;letter-spacing:.5px;}
   .score-row{display:flex;justify-content:space-between;align-items:center;padding:13px 2px;border-bottom:1px solid var(--grid);}
   .score-row:last-child{border-bottom:none;}
   .prow-name{font-weight:800;text-transform:uppercase;font-size:0.94rem;}
@@ -482,6 +482,8 @@ let unlockedGroupId = null;
 let adminUnlocked = false;
 let dirty = false;
 let lastSavedJSON = '';
+let scoreAckInProgress = false;
+let queuedRealtimeState = null;
 
 function uid(){ return 'g_' + Math.random().toString(36).slice(2,9); }
 function personUid(){ return 'p_' + Math.random().toString(36).slice(2,9); }
@@ -972,6 +974,8 @@ function renderLog(){
     const previousPos = g.currentPos;
 
     btn.disabled = true;
+    scoreAckInProgress = true;
+    queuedRealtimeState = null;
     btn.classList.remove('reported','save-failed');
     btn.classList.add('saving');
     btn.textContent = 'Reporting…';
@@ -987,6 +991,8 @@ function renderLog(){
       activePlayers.forEach(p=>{ p.scores[holeIdx] = previousScores.get(p.id); });
       g.currentPos = previousPos;
       dirty = false;
+      scoreAckInProgress = false;
+      queuedRealtimeState = null;
       btn.disabled = false;
       btn.classList.remove('saving');
       btn.classList.add('save-failed');
@@ -999,19 +1005,51 @@ function renderLog(){
     btn.classList.add('reported');
     btn.innerHTML = '✓ Reported';
 
-    // Expand a large confirmation up from the save button across only the player-entry area.
+    // Deterministic acknowledgement animation. Reset the panel completely on every
+    // save, slide it up across only the player-entry area, hold for one full
+    // second, then slide it back down before advancing to the next hole.
     const ack = document.getElementById('scoreAckOverlay');
     if(ack){
-      ack.classList.remove('collapse');
-      requestAnimationFrame(()=> requestAnimationFrame(()=> ack.classList.add('show')));
-      // Let the slide-up complete, then keep the full acknowledgement visible for one full second.
-      await new Promise(resolve => setTimeout(resolve, 360));
+      ack.getAnimations().forEach(animation => animation.cancel());
+      ack.style.display = 'flex';
+      ack.style.transform = 'translateY(100%)';
+
+      // Force the reset state to paint before starting the entrance animation.
+      await new Promise(resolve => requestAnimationFrame(()=> requestAnimationFrame(resolve)));
+
+      const enterAnimation = ack.animate(
+        [
+          { transform: 'translateY(100%)' },
+          { transform: 'translateY(0%)' }
+        ],
+        { duration: 420, easing: 'cubic-bezier(.22,.8,.26,1)', fill: 'forwards' }
+      );
+      await enterAnimation.finished.catch(()=>{});
+
       await new Promise(resolve => setTimeout(resolve, 1000));
-      ack.classList.add('collapse');
-      ack.classList.remove('show');
-      await new Promise(resolve => setTimeout(resolve, 300));
+
+      const exitAnimation = ack.animate(
+        [
+          { transform: 'translateY(0%)' },
+          { transform: 'translateY(100%)' }
+        ],
+        { duration: 340, easing: 'cubic-bezier(.7,0,.84,0)', fill: 'forwards' }
+      );
+      await exitAnimation.finished.catch(()=>{});
+
+      ack.getAnimations().forEach(animation => animation.cancel());
+      ack.style.transform = 'translateY(100%)';
+      ack.style.display = 'none';
     } else {
       await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    scoreAckInProgress = false;
+    if(queuedRealtimeState){
+      state = queuedRealtimeState;
+      normalizeStateShape();
+      lastSavedJSON = JSON.stringify(state);
+      queuedRealtimeState = null;
     }
 
     editingHolePos = null;
@@ -1598,7 +1636,28 @@ function subscribeRealtime(){
   sb.channel('tournament_state_changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'tournament_state', filter: `id=eq.${ROW_ID}` }, payload => {
       if(payload.new && payload.new.data && !dirty){
-        state = payload.new.data;
+        const incomingState = payload.new.data;
+        const incomingJSON = JSON.stringify(incomingState);
+
+        // Do not rebuild the score-entry DOM while the Reported acknowledgement
+        // is on screen. Keep only the newest realtime snapshot and apply it once
+        // the animation finishes. This prevents Supabase's echo of our own save
+        // (or another device's update) from cutting the animation in half.
+        if(scoreAckInProgress){
+          queuedRealtimeState = incomingState;
+          setSyncLabel('synced', false);
+          return;
+        }
+
+        // Supabase normally echoes our own successful upsert back through
+        // Realtime. If it is byte-for-byte the state we just saved, no UI
+        // rebuild is necessary.
+        if(incomingJSON === lastSavedJSON){
+          setSyncLabel('synced', false);
+          return;
+        }
+
+        state = incomingState;
         normalizeStateShape();
         lastSavedJSON = JSON.stringify(state);
         renderAll();
