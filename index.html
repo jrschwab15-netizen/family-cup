@@ -56,9 +56,12 @@
 
   .arch{background:var(--white);border-radius:50% 50% 0 0 / 90px 90px 0 0;height:82px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 3px 10px rgba(0,0,0,0.18);}
   .arch h1{font-family:var(--sans);font-weight:900;font-size:1.9rem;letter-spacing:2px;margin:0;line-height:1;}
-  .subplaque{background:var(--white);border-top:2px solid var(--grid);padding:8px 16px 10px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 3px 8px rgba(0,0,0,0.1);margin-bottom:10px;border-radius:0 0 6px 6px;}
+  .arch-tname{display:none;color:var(--ink);font-family:var(--sans);font-weight:900;font-size:0.95rem;letter-spacing:0.5px;text-transform:uppercase;max-width:92%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1;}
+  body.leaderboard-view .arch-tname{display:block;}
+  .subplaque{background:var(--white);border-top:2px solid var(--grid);padding:8px 16px 10px;display:flex;justify-content:space-between;align-items:center;gap:10px;box-shadow:0 3px 8px rgba(0,0,0,0.1);margin-bottom:10px;border-radius:0 0 6px 6px;}
   .subplaque .tname{color:var(--ink);font-family:var(--sans);font-weight:900;font-size:0.95rem;letter-spacing:0.5px;text-transform:uppercase;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .subplaque .sub{font-size:0.58rem;color:#777;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;font-weight:700;}
+  body.leaderboard-view .subplaque .tname{display:none;}
+    .subplaque .sub{font-size:0.58rem;color:#777;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;font-weight:700;margin-left:auto;}
   .subplaque .sub.err{color:var(--red);}
 
   .grid-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;background:var(--white);border:1px solid var(--grid);border-radius:8px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
@@ -108,7 +111,7 @@
   td.bb-cell.over .bb-num{color:var(--red);}
   td.bb-cell.empty{color:transparent;}
   .empty-board{padding:26px 16px;text-align:center;color:#777;font-size:0.9rem;background:var(--white);border-radius:8px;border:1px solid var(--grid);margin-bottom:16px;}
-  .board-toggle{display:flex;justify-content:center;gap:6px;margin:0;padding:0;}
+  .board-toggle{display:flex;justify-content:flex-start;align-items:center;gap:6px;margin:0;padding:0;flex:0 0 auto;}
   body:not(.leaderboard-view) .board-toggle{display:none;}
   .board-toggle button{background:var(--white);border:1px solid var(--grid);color:#666;border-radius:18px;padding:6px 16px;font-size:0.72rem;font-weight:800;cursor:pointer;line-height:1;}
   .board-toggle button.active{background:var(--ink);color:var(--white);border-color:var(--ink);}
@@ -129,10 +132,20 @@
   .new-group-row input.gpin{width:70px;text-align:center;}
   .new-group-row button{background:var(--red);color:var(--white);border:none;border-radius:7px;padding:0 14px;font-weight:800;font-size:0.84rem;cursor:pointer;}
 
-  .active-group-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-  .active-group-bar .g{font-weight:800;font-size:0.92rem;text-transform:uppercase;}
+  .active-group-bar{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:9px;}
+  .active-group-bar .g{font-weight:800;font-size:0.92rem;text-transform:uppercase;min-width:0;flex:1;padding-top:2px;}
   .active-group-bar .g span{color:#888;font-weight:600;font-size:0.68rem;display:block;text-transform:none;}
-  .active-group-bar button{background:var(--white);border:1px solid var(--grid);color:#555;border-radius:7px;padding:6px 10px;font-size:0.7rem;cursor:pointer;font-weight:700;}
+  .active-group-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto;}
+  .active-group-bar button,.compact-edit-select{background:var(--white);border:1px solid var(--grid);color:#555;border-radius:7px;height:30px;padding:0 8px;font-size:0.64rem;cursor:pointer;font-weight:700;line-height:1;}
+  .compact-edit-select{max-width:96px;padding-right:4px;}
+
+  /* The score-entry screen is intentionally stripped down for phones: just the
+     tournament name at the top, then the scoring controls. */
+  body.log-view .arch{display:none;}
+  body.log-view .wrap{padding-top:7px;}
+  body.log-view .subplaque{border-top:0;border-radius:8px;padding:9px 12px;margin-bottom:8px;box-shadow:0 2px 6px rgba(0,0,0,0.08);}
+  body.log-view .subplaque .tname{display:block;text-align:center;font-size:0.88rem;}
+  body.log-view .subplaque .sub{display:none;}
 
   .score-rows{display:flex;flex-direction:column;}
   .score-row{display:flex;justify-content:space-between;align-items:center;padding:13px 2px;border-bottom:1px solid var(--grid);}
@@ -165,8 +178,12 @@
   .quickpad{display:grid;grid-template-columns:repeat(9,1fr);gap:5px;margin-bottom:14px;}
   .quickpad button{background:var(--cream);border:1px solid var(--grid);color:var(--ink);border-radius:8px;padding:9px 0;font-family:var(--mono);font-size:0.85rem;cursor:pointer;font-weight:700;}
   .quickpad button.selected{background:var(--red);color:var(--white);border-color:var(--red);}
-  .save-next{display:block;width:100%;background:var(--ink);color:var(--white);border:none;border-radius:10px;padding:14px 0;font-size:0.95rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;}
-  .save-next:disabled{opacity:0.4;}
+  .save-next{display:block;width:100%;background:var(--ink);color:var(--white);border:none;border-radius:10px;padding:14px 0;font-size:0.95rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;transition:background .18s ease,transform .18s ease,opacity .18s ease;}
+  .save-next:disabled{opacity:0.72;cursor:default;}
+  .save-next.saving{opacity:0.78;}
+  .save-next.reported{background:var(--under-green);opacity:1;animation:reportedPop .42s ease;text-transform:none;font-size:1rem;}
+  .save-next.save-failed{background:var(--red);opacity:1;text-transform:none;}
+  @keyframes reportedPop{0%{transform:scale(1);}45%{transform:scale(1.025);}100%{transform:scale(1);}}
   .strip{display:flex;gap:4px;margin-top:16px;overflow-x:auto;padding-bottom:2px;}
   .strip .hchip{flex:0 0 30px;height:30px;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-size:0.62rem;border:1px solid var(--grid);color:#999;cursor:pointer;line-height:1.1;}
   .strip .hchip.filled{background:#fbe6e9;color:var(--red);font-weight:700;}
@@ -307,13 +324,14 @@
 
   <div class="arch">
     <h1>LEADERS</h1>
+    <div class="arch-tname" id="leaderTname">Family Cup</div>
+  </div>
+  <div class="subplaque">
+    <div class="tname" id="tname">Family Cup</div>
     <div class="board-toggle">
       <button id="toggleIndividualBtn" class="active">Individual</button>
       <button id="toggleBestBallBtn">Best Ball</button>
     </div>
-  </div>
-  <div class="subplaque">
-    <div class="tname" id="tname">Family Cup</div>
     <div class="sub" id="syncTime">connecting…</div>
   </div>
 
@@ -797,14 +815,14 @@ function renderLog(){
 
   if(pendingSwitchOut){
     if(!state.adminPin){
-      area.innerHTML = `<div class="lock-panel"><p>A score has already been logged from this device, so switching groups needs the admin PIN — but no admin PIN has been set yet. Ask whoever set up the tournament to set one in the Admin tab first.</p>
+      area.innerHTML = `<div class="lock-panel"><p>This device is locked to its selected group. Switching groups requires the admin PIN, but no admin PIN has been set yet. Ask the tournament organizer for help.</p>
         <button id="cancelSwitchBtn" style="background:none;color:#888;text-decoration:underline;border:none;cursor:pointer;font-size:0.8rem;">Go back</button></div>`;
       document.getElementById('cancelSwitchBtn').addEventListener('click', ()=>{ pendingSwitchOut=false; renderLog(); });
       return;
     }
     area.innerHTML = `
       <div class="lock-panel">
-        <p>A score has already been logged from this device. Enter the admin PIN to switch to a different group — this is to stop someone else's group from getting tampered with by accident.</p>
+        <p>This device is locked to <strong>${escapeHtml(findGroup(unlockedGroupId)?.name || 'this group')}</strong>. Enter the admin PIN to switch groups.</p>
         <div class="new-group-row">
           <input type="password" inputmode="numeric" id="switchAdminPin" placeholder="Admin PIN" style="width:140px;">
           <button id="confirmSwitchBtn">Confirm</button>
@@ -833,25 +851,20 @@ function renderLog(){
   if(!g){ area.innerHTML=''; renderLockArea(); return; }
   renderLockArea();
 
-  let bar = `<div class="active-group-bar">
-      <div class="g">${escapeHtml(g.name)}<span>Started hole ${g.startHole}</span></div>
-      <button id="lockOutBtn">Switch group</button>
-    </div>`;
-
   const doSwitchOut = ()=>{
-    if(deviceHasLogged()){
-      pendingSwitchOut = true;
-      renderLog();
-      return;
-    }
-    unlockedGroupId=null; holeDrafts={}; editingHolePos=null;
-    try{ localStorage.removeItem(LS_GROUP_KEY); }catch(e){}
+    // Once a device has selected a group, switching is always admin-protected.
+    // This prevents someone from casually jumping into another group's scorer.
+    pendingSwitchOut = true;
     renderLog();
   };
 
   const activePlayers = groupPlayers(g);
   if(activePlayers.length===0){
-    area.innerHTML = bar + '<div class="no-player">No players are on this group\'s roster yet — add them in the Admin tab.</div>';
+    const emptyBar = `<div class="active-group-bar">
+      <div class="g">${escapeHtml(g.name)}<span>Started hole ${g.startHole}</span></div>
+      <div class="active-group-actions"><button id="lockOutBtn">Switch group</button></div>
+    </div>`;
+    area.innerHTML = emptyBar + '<div class="no-player">No players are on this group\'s roster yet — add them in the Admin tab.</div>';
     document.getElementById('lockOutBtn').addEventListener('click', doSwitchOut);
     return;
   }
@@ -863,18 +876,21 @@ function renderLog(){
   const pos = isEditing ? editingHolePos : groupCurrentPos;
   const allDone = groupCurrentPos >= 18;
 
-  // "Edit a previous hole" control — available whenever at least one hole has been played
-  let editPicker = '';
+  // Keep the edit control compact and beside Switch group so it is always easy
+  // to find without taking a full row of precious mobile space.
+  let editControl = '';
   if(editablePosCount > 0 && !isEditing){
-    let opts = '<option value="">Edit a previous hole…</option>';
+    let opts = '<option value="">Edit hole…</option>';
     for(let i=0;i<editablePosCount;i++) opts += `<option value="${i}">Hole ${order[i]}</option>`;
-    editPicker = `<div style="margin-bottom:14px;">
-      <select id="editHoleSelect" style="width:100%;background:var(--white);border:1px solid var(--grid);border-radius:8px;padding:10px;font-size:0.85rem;color:#555;">${opts}</select>
-    </div>`;
+    editControl = `<select id="editHoleSelect" class="compact-edit-select" aria-label="Edit a previous hole">${opts}</select>`;
   }
+  const bar = `<div class="active-group-bar">
+      <div class="g">${escapeHtml(g.name)}<span>Started hole ${g.startHole}</span></div>
+      <div class="active-group-actions">${editControl}<button id="lockOutBtn">Switch group</button></div>
+    </div>`;
 
   if(allDone && !isEditing){
-    area.innerHTML = bar + editPicker + `<div class="no-player">All 18 holes are logged for ${escapeHtml(g.name)}. Check the Leaderboard tab to see how everyone finished — or edit a hole above if something was mis-scored.</div>`;
+    area.innerHTML = bar + `<div class="no-player">All 18 holes are logged for ${escapeHtml(g.name)}. Check the Leaderboard tab to see how everyone finished — or use Edit hole above if something was mis-scored.</div>`;
     document.getElementById('lockOutBtn').addEventListener('click', doSwitchOut);
     wireEditPicker();
     return;
@@ -905,7 +921,7 @@ function renderLog(){
   const saveLabel = isEditing ? 'Save changes' : 'Save &amp; next hole';
   const cancelLink = isEditing ? `<button id="cancelEdit" style="display:block;width:100%;background:none;border:none;color:#888;font-size:0.75rem;text-decoration:underline;cursor:pointer;margin-top:10px;">Cancel, don't change this hole</button>` : '';
 
-  area.innerHTML = bar + editPicker + `
+  area.innerHTML = bar + `
     <div class="log-panel">
       <div class="hole-title" style="margin-bottom:10px;">
         <div class="hnum">${isEditing?'EDITING ':''}HOLE ${actualHole}</div>
@@ -933,13 +949,46 @@ function renderLog(){
       area.querySelector(`.prow-val[data-pid-val="${pid}"]`).textContent = holeDrafts[pid];
     });
   });
-  document.getElementById('saveNext').addEventListener('click', ()=>{
+  document.getElementById('saveNext').addEventListener('click', async ()=>{
+    const btn = document.getElementById('saveNext');
+    if(btn.disabled) return;
+
+    const previousScores = new Map(activePlayers.map(p => [p.id, p.scores[holeIdx]]));
+    const previousPos = g.currentPos;
+
+    btn.disabled = true;
+    btn.classList.remove('reported','save-failed');
+    btn.classList.add('saving');
+    btn.textContent = 'Reporting…';
+
     activePlayers.forEach(p=>{ p.scores[holeIdx] = holeDrafts[p.id] !== undefined ? holeDrafts[p.id] : holeInfo.par; });
     if(!isEditing) g.currentPos = pos + 1;
+
+    dirty = true;
+    clearTimeout(window.__saveTimer);
+    const saved = await saveNow();
+
+    if(!saved){
+      activePlayers.forEach(p=>{ p.scores[holeIdx] = previousScores.get(p.id); });
+      g.currentPos = previousPos;
+      dirty = false;
+      btn.disabled = false;
+      btn.classList.remove('saving');
+      btn.classList.add('save-failed');
+      btn.textContent = 'Save failed — tap again';
+      return;
+    }
+
+    markDeviceHasLogged();
+    btn.classList.remove('saving');
+    btn.classList.add('reported');
+    btn.innerHTML = '✓ Reported';
+
+    // Hold the acknowledgement just long enough to be unmistakable, then advance.
+    await new Promise(resolve => setTimeout(resolve, 700));
+
     editingHolePos = null;
     holeDrafts = {};
-    markDeviceHasLogged();
-    saveSoon();
     renderLog();
     renderLeaderboard();
     renderBestBall();
@@ -1478,6 +1527,7 @@ function renderAdmin(){
 /* ---------- Global render ---------- */
 function renderAll(){
   document.getElementById('tname').textContent = state.tournamentName;
+  document.getElementById('leaderTname').textContent = state.tournamentName;
   renderLeaderboard();
   renderBestBall();
   renderLog();
@@ -1492,15 +1542,20 @@ function saveSoon(){
   window.__saveTimer = setTimeout(saveNow, 350);
 }
 async function saveNow(){
-  if(!sb){ setSyncLabel('preview mode — not saved', true); dirty=false; return; }
+  if(!sb){ setSyncLabel('preview mode — not saved', true); dirty=false; return false; }
   try{
     const json = JSON.stringify(state);
-    if(json === lastSavedJSON){ dirty=false; return; }
+    if(json === lastSavedJSON){ dirty=false; return true; }
     const { error } = await sb.from('tournament_state').upsert({ id: ROW_ID, data: state, updated_at: new Date().toISOString() });
     if(error) throw error;
     lastSavedJSON = json; dirty = false;
     setSyncLabel('synced', false);
-  }catch(err){ console.error('save failed', err); setSyncLabel('save failed — check connection', true); }
+    return true;
+  }catch(err){
+    console.error('save failed', err);
+    setSyncLabel('save failed — check connection', true);
+    return false;
+  }
 }
 async function loadInitial(){
   if(!sb){ setSyncLabel('preview mode — add Supabase keys', true); return; }
@@ -1649,6 +1704,7 @@ function showView(name){
   document.getElementById('tabLogBtn').classList.toggle('active', name==='log');
   document.getElementById('tabAdminBtn').classList.toggle('active', name==='admin');
   document.body.classList.toggle('leaderboard-view', name==='leaderboard');
+  document.body.classList.toggle('log-view', name==='log');
   document.documentElement.classList.toggle('leaderboard-shell', name==='leaderboard');
   if(name==='leaderboard') queueLeaderboardFit();
 }
