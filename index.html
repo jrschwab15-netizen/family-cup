@@ -147,7 +147,15 @@
   body.log-view .subplaque .tname{display:block;text-align:center;font-size:0.88rem;}
   body.log-view .subplaque .sub{display:none;}
 
+  .score-entry-stage{position:relative;}
   .score-rows{display:flex;flex-direction:column;}
+  .score-ack-overlay{position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:var(--under-green);color:var(--white);border-radius:8px;pointer-events:none;opacity:0;clip-path:inset(100% 0 0 0 round 8px);transition:clip-path .34s cubic-bezier(.22,.8,.26,1),opacity .12s ease;}
+  .score-ack-overlay.show{opacity:1;clip-path:inset(0 0 0 0 round 8px);}
+  .score-ack-overlay.collapse{opacity:1;clip-path:inset(100% 0 0 0 round 8px);transition:clip-path .28s cubic-bezier(.7,0,.84,0),opacity .08s linear .23s;}
+  .score-ack-check{width:70px;height:70px;border-radius:50%;background:var(--white);color:var(--under-green);display:flex;align-items:center;justify-content:center;font-size:2.8rem;font-weight:900;line-height:1;box-shadow:0 4px 12px rgba(0,0,0,.14);transform:scale(.84);transition:transform .3s ease .12s;}
+  .score-ack-overlay.show .score-ack-check{transform:scale(1);}
+  .score-ack-text{font-family:var(--sans);font-size:1.35rem;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;}
+  .score-ack-sub{font-size:.72rem;font-weight:700;opacity:.9;text-transform:uppercase;letter-spacing:.5px;}
   .score-row{display:flex;justify-content:space-between;align-items:center;padding:13px 2px;border-bottom:1px solid var(--grid);}
   .score-row:last-child{border-bottom:none;}
   .prow-name{font-weight:800;text-transform:uppercase;font-size:0.94rem;}
@@ -927,7 +935,14 @@ function renderLog(){
         <div class="hnum">${isEditing?'EDITING ':''}HOLE ${actualHole}</div>
         <div class="hpar">Par ${holeInfo.par} · Stroke Index ${holeInfo.si}</div>
       </div>
-      <div class="score-rows">${rows}</div>
+      <div class="score-entry-stage" id="scoreEntryStage">
+        <div class="score-rows">${rows}</div>
+        <div class="score-ack-overlay" id="scoreAckOverlay" aria-live="polite">
+          <div class="score-ack-check">✓</div>
+          <div class="score-ack-text">Reported</div>
+          <div class="score-ack-sub">Score saved</div>
+        </div>
+      </div>
       <button class="save-next" id="saveNext" style="margin-top:16px;">${saveLabel}</button>
       ${cancelLink}
     </div>`;
@@ -984,8 +999,20 @@ function renderLog(){
     btn.classList.add('reported');
     btn.innerHTML = '✓ Reported';
 
-    // Hold the acknowledgement just long enough to be unmistakable, then advance.
-    await new Promise(resolve => setTimeout(resolve, 700));
+    // Expand a large confirmation up from the save button across only the player-entry area.
+    const ack = document.getElementById('scoreAckOverlay');
+    if(ack){
+      ack.classList.remove('collapse');
+      requestAnimationFrame(()=> requestAnimationFrame(()=> ack.classList.add('show')));
+      // Let the slide-up complete, then keep the full acknowledgement visible for one full second.
+      await new Promise(resolve => setTimeout(resolve, 360));
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      ack.classList.add('collapse');
+      ack.classList.remove('show');
+      await new Promise(resolve => setTimeout(resolve, 300));
+    } else {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
 
     editingHolePos = null;
     holeDrafts = {};
