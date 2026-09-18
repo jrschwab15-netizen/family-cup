@@ -28,9 +28,9 @@
   .wrap{max-width:640px;margin:0 auto;padding:18px 12px 0;}
   .view{display:none;} .view.active{display:block;}
 
-  .arch{background:var(--white);border-radius:50% 50% 0 0 / 90px 90px 0 0;height:78px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,0.18);}
-  .arch h1{font-family:var(--sans);font-weight:900;font-size:1.9rem;letter-spacing:2px;margin:0;}
-  .subplaque{background:var(--white);border-top:2px solid var(--grid);padding:8px 16px 10px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 3px 8px rgba(0,0,0,0.1);margin-bottom:16px;border-radius:0 0 6px 6px;}
+  .arch{background:var(--white);border-radius:50% 50% 0 0 / 90px 90px 0 0;height:82px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 3px 10px rgba(0,0,0,0.18);}
+  .arch h1{font-family:var(--sans);font-weight:900;font-size:1.9rem;letter-spacing:2px;margin:0;line-height:1;}
+  .subplaque{background:var(--white);border-top:2px solid var(--grid);padding:8px 16px 10px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 3px 8px rgba(0,0,0,0.1);margin-bottom:10px;border-radius:0 0 6px 6px;}
   .subplaque .tname{color:var(--ink);font-family:var(--sans);font-weight:900;font-size:0.95rem;letter-spacing:0.5px;text-transform:uppercase;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .subplaque .sub{font-size:0.58rem;color:#777;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;font-weight:700;}
   .subplaque .sub.err{color:var(--red);}
@@ -82,9 +82,9 @@
   td.bb-cell.over .bb-num{color:var(--red);}
   td.bb-cell.empty{color:transparent;}
   .empty-board{padding:26px 16px;text-align:center;color:#777;font-size:0.9rem;background:var(--white);border-radius:8px;border:1px solid var(--grid);margin-bottom:16px;}
-  .sync-note{text-align:center;font-size:0.65rem;color:#777;margin:4px 0 10px;line-height:1.5;}
-  .board-toggle{display:flex;justify-content:center;gap:8px;margin:0 0 6px;padding:0 0 2px;}
-  .board-toggle button{background:var(--white);border:1px solid var(--grid);color:#666;border-radius:20px;padding:9px 20px;font-size:0.82rem;font-weight:700;cursor:pointer;}
+  .board-toggle{display:flex;justify-content:center;gap:6px;margin:0;padding:0;}
+  body:not(.leaderboard-view) .board-toggle{display:none;}
+  .board-toggle button{background:var(--white);border:1px solid var(--grid);color:#666;border-radius:18px;padding:6px 16px;font-size:0.72rem;font-weight:800;cursor:pointer;line-height:1;}
   .board-toggle button.active{background:var(--ink);color:var(--white);border-color:var(--ink);}
 
   .section-title{font-size:0.68rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--red);margin:0 0 8px 2px;font-weight:800;}
@@ -210,8 +210,8 @@
 
   @media (min-width: 700px){
     .wrap{max-width:1000px;padding:26px 20px 0;}
-    .arch{height:96px;}
-    .arch h1{font-size:2.3rem;letter-spacing:3px;}
+    .arch{height:90px;gap:7px;}
+    .arch h1{font-size:2.2rem;letter-spacing:3px;}
     .subplaque .tname{font-size:1.1rem;}
     .subplaque .sub{font-size:0.68rem;}
     table.leader-table th, table.leader-table td{padding:12px 9px;font-size:1.08rem;}
@@ -248,10 +248,11 @@
 
   @media (min-width: 1100px){
     .wrap{max-width:1500px;padding:32px 24px 0;}
-    .arch{height:110px;}
-    .arch h1{font-size:2.7rem;letter-spacing:4px;}
-    table.leader-table th, table.leader-table td{padding:14px 11px;font-size:1.2rem;}
-    table.leader-table thead th{font-size:0.78rem;}
+    .arch{height:96px;gap:7px;}
+    .arch h1{font-size:2.45rem;letter-spacing:4px;}
+    table.leader-table th, table.leader-table td{padding:9px 8px;font-size:1.05rem;}
+    table.leader-table thead th{font-size:0.72rem;}
+    #view-leaderboard table.leader-table tbody td{padding-top:9px;padding-bottom:9px;}
     th.rank-col, td.rank-col{width:4%;min-width:0;max-width:none;}
     th.player-col, td.player-col{width:15%;min-width:0;max-width:none;}
     th.hole-th{width:3.2%;}
@@ -260,10 +261,10 @@
     th.total-col, td.total-col{width:6%;min-width:0;max-width:none;}
     th.net-col, td.net-col{width:8.9%;min-width:0;max-width:none;}
     .stacked{font-size:0.68rem !important;}
-    td.rank-col{font-size:1.15rem;}
-    td.player-col .pn{font-size:1rem;}
-    td.score-cell{font-size:1.2rem;}
-    td.net-col{font-size:1.4rem;}
+    td.rank-col{font-size:1.05rem;}
+    td.player-col .pn{font-size:0.92rem;}
+    td.score-cell{font-size:1.05rem;}
+    td.net-col{font-size:1.2rem;}
     .grid-scroll{border-radius:12px;}
     .score-row{padding:18px 6px;}
     .prow-name{font-size:1.15rem;}
@@ -278,7 +279,13 @@
 <body>
 <div class="wrap">
 
-  <div class="arch"><h1>LEADERS</h1></div>
+  <div class="arch">
+    <h1>LEADERS</h1>
+    <div class="board-toggle">
+      <button id="toggleIndividualBtn" class="active">Individual</button>
+      <button id="toggleBestBallBtn">Best Ball</button>
+    </div>
+  </div>
   <div class="subplaque">
     <div class="tname" id="tname">Family Cup</div>
     <div class="sub" id="syncTime">connecting…</div>
@@ -286,11 +293,6 @@
 
   <!-- LEADERBOARD -->
   <div class="view active" id="view-leaderboard">
-    <div class="board-toggle">
-      <button id="toggleIndividualBtn" class="active">Individual</button>
-      <button id="toggleBestBallBtn">Best Ball</button>
-    </div>
-    <div class="sync-note" id="boardSyncNote">Live from the course — updates the instant a group's scorer logs a hole. Safe to leave open in the clubhouse.</div>
     <div id="boardWrap"></div>
     <div id="bestBallWrap" style="display:none;"></div>
   </div>
@@ -1554,9 +1556,6 @@ function showBoardMode(mode){
   document.getElementById('bestBallWrap').style.display = mode==='bestball' ? 'block' : 'none';
   document.getElementById('toggleIndividualBtn').classList.toggle('active', mode==='individual');
   document.getElementById('toggleBestBallBtn').classList.toggle('active', mode==='bestball');
-  document.getElementById('boardSyncNote').textContent = mode==='individual'
-    ? "Live from the course — updates the instant a group's scorer logs a hole. Safe to leave open in the clubhouse."
-    : "Best (handicap-adjusted) score per hole for each group, with who posted it.";
   queueLeaderboardFit();
 }
 document.getElementById('toggleIndividualBtn').addEventListener('click', ()=>showBoardMode('individual'));
