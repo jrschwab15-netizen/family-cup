@@ -623,7 +623,7 @@ function renderLeaderboard(){
     const netCls = r.s.netToPar<0 ? 'under' : (r.s.netToPar>0 ? 'over' : 'even');
     tbody += '<tr>';
     tbody += `<td class="rank-col">${idx+1}</td>`;
-    tbody += `<td class="player-col"><span class="pn">${escapeHtml(r.p.name)}${isLeader?' 🏆':''}</span><span class="gtag">${escapeHtml(r.g ? r.g.name : 'Unassigned')}</span></td>`;
+    tbody += `<td class="player-col"><span class="pn">${escapeHtml(r.p.name)}</span><span class="gtag">${escapeHtml(r.g ? r.g.name : 'Unassigned')}</span></td>`;
     for(let i=0;i<18;i++){
       const v = r.p.scores[i];
       const has = v!==null && v!==undefined && v!=='';
@@ -698,7 +698,7 @@ function renderBestBall(){
     tbody += '<tr>';
     tbody += `<td class="rank-col">${idx+1}</td>`;
     const rosterNames = groupPlayers(r.g).map(p=>p.name).join(', ') || 'No players assigned';
-    tbody += `<td class="player-col"><span class="pn">${escapeHtml(r.g.name)}${isLeader?' 🏆':''}</span><span class="gtag">${escapeHtml(rosterNames)}</span></td>`;
+    tbody += `<td class="player-col"><span class="pn">${escapeHtml(r.g.name)}</span><span class="gtag">${escapeHtml(rosterNames)}</span></td>`;
     for(let i=0;i<18;i++){
       const b = r.holeBest[i];
       if(!b){
