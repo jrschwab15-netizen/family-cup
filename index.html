@@ -64,9 +64,6 @@
   td.score-cell.even{color:var(--ink);}
   td.score-cell.over{color:var(--red);}
   td.score-cell.empty{color:transparent;}
-  .mark-circle, .mark-square{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border:2px solid currentColor;line-height:1;box-sizing:border-box;font-variant-numeric:tabular-nums;}
-  .mark-circle{border-radius:50%;}
-  .mark-square{border-radius:2px;}
   th.hole9end, td.hole9end{border-right:3px solid var(--ink);}
   th.par-label, td.par-label-row{font-weight:800;font-size:0.6rem;color:#555;}
   td.thru-col{font-family:var(--mono);font-weight:700;font-size:0.92rem;color:#333;}
@@ -181,6 +178,22 @@
   .group-block-head .gn small{display:block;font-weight:500;text-transform:none;color:#888;font-size:0.66rem;}
   .group-block-head button{background:none;border:1px solid var(--grid);color:#999;border-radius:6px;padding:5px 9px;font-size:0.66rem;cursor:pointer;}
 
+  .admin-subtabs{display:flex;gap:6px;background:var(--cream);padding:4px;border:1px solid var(--grid);border-radius:9px;margin-bottom:14px;}
+  .admin-subtabs button{flex:1;border:none;background:transparent;color:#777;border-radius:7px;padding:9px 10px;font-size:0.8rem;font-weight:800;cursor:pointer;}
+  .admin-subtabs button.active{background:var(--white);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+  .admin-panel-note{font-size:0.76rem;color:#777;line-height:1.45;margin:0 0 12px;}
+  .group-builder{border:1px solid var(--grid);background:var(--cream);border-radius:10px;padding:12px;margin:12px 0 16px;}
+  .group-builder label{display:block;font-size:0.68rem;color:#666;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 5px;}
+  .group-builder input,.group-builder select{width:100%;background:var(--white);border:1px solid var(--grid);color:var(--ink);border-radius:7px;padding:10px 11px;font-size:0.88rem;outline:none;}
+  .group-builder input:focus,.group-builder select:focus{border-color:var(--red);}
+  .group-builder-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+  .group-builder-actions button{border:none;border-radius:8px;padding:10px 13px;font-size:0.8rem;font-weight:800;cursor:pointer;}
+  .group-builder-actions .save-group{background:var(--ink);color:var(--white);flex:1;min-width:130px;}
+  .group-builder-actions .cancel-group{background:var(--white);border:1px solid var(--grid);color:#666;}
+  .add-fifth{width:100%;margin-top:10px;background:var(--white);border:1px dashed #999;color:#666;border-radius:8px;padding:9px;font-size:0.78rem;font-weight:700;cursor:pointer;}
+  .person-assignment{display:block;color:#999;font-size:0.65rem;margin-top:2px;}
+  .admin-primary{background:var(--red);color:var(--white);border:none;border-radius:8px;padding:10px 14px;font-size:0.84rem;font-weight:800;cursor:pointer;}
+
   .tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--white);border-top:1px solid var(--grid);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:10;}
   .tabbar button{flex:1;background:none;border:none;color:#999;padding:12px 0 10px;font-size:0.64rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;}
   .tabbar button .ic{font-size:1.2rem;}
@@ -212,7 +225,6 @@
     td.player-col .pn{font-size:0.92rem;}
     td.player-col .gtag{font-size:0.6rem;}
     td.score-cell{font-size:1.02rem;}
-    .mark-circle, .mark-square{width:22px;height:22px;border-width:1.5px;}
     td.thru-col{font-size:1.05rem;}
     td.total-col{font-size:1.12rem;}
     td.net-col{font-size:1.25rem;}
@@ -247,7 +259,6 @@
     td.rank-col{font-size:1.15rem;}
     td.player-col .pn{font-size:1rem;}
     td.score-cell{font-size:1.2rem;}
-    .mark-circle, .mark-square{width:30px;height:30px;border-width:2px;}
     td.net-col{font-size:1.4rem;}
     .grid-scroll{border-radius:12px;}
     .score-row{padding:18px 6px;}
@@ -327,25 +338,43 @@
         </div>
       </div>
 
-      <div class="section-title">Groups &amp; players</div>
+      <div class="section-title">People &amp; groups</div>
       <div class="card">
-        <div class="new-group-row">
-          <input class="gname" id="adminGroupName" placeholder="Group name (e.g. Group 1)">
-          <button id="adminAddGroupBtn">Add group</button>
+        <div class="admin-subtabs">
+          <button id="adminPeopleTabBtn" class="active">People</button>
+          <button id="adminGroupsTabBtn">Groups</button>
         </div>
-        <div id="adminGroupError" style="color:var(--red);font-size:0.75rem;margin-top:6px;"></div>
-        <div id="adminGroupList" style="margin-top:14px;"></div>
+
+        <div id="adminPeoplePanel">
+          <p class="admin-panel-note">Pre-load everyone here with their handicap. People appear on the Individual leaderboard immediately, even before groups are assigned.</p>
+          <div class="add-row">
+            <input class="name" id="adminPersonName" placeholder="Player name">
+            <input class="hcp" id="adminPersonHcp" placeholder="Hcp" type="number" inputmode="numeric">
+            <button id="adminAddPersonBtn">Add person</button>
+          </div>
+          <div id="adminPersonError" style="color:var(--red);font-size:0.75rem;margin-top:6px;"></div>
+          <div id="adminPersonList" style="margin-top:14px;"></div>
+        </div>
+
+        <div id="adminGroupsPanel" style="display:none;">
+          <p class="admin-panel-note">Build groups from the People list. Once someone is assigned, they disappear from the available choices for other spots and groups.</p>
+          <button class="admin-primary" id="adminStartGroupBtn">+ Add group</button>
+          <div id="adminGroupBuilder"></div>
+          <div id="adminGroupSavedMsg" style="font-size:0.75rem;color:#3a8a4a;font-weight:700;margin:8px 0;"></div>
+          <div id="adminGroupError" style="color:var(--red);font-size:0.75rem;margin-top:6px;"></div>
+          <div id="adminGroupList" style="margin-top:14px;"></div>
+        </div>
       </div>
 
       <div class="section-title">Session</div>
       <div class="card">
-        <p style="font-size:0.78rem;color:#666;margin:0 0 4px;line-height:1.5;"><strong>Clear scores</strong> — wipes every score so far but keeps your groups, players, and handicaps exactly as they are. Use this to start a new round with the same roster.</p>
-        <button id="clearScoresBtn" style="background:var(--white);border:1px solid #c98a1e;color:#a06b12;border-radius:7px;padding:10px 16px;font-weight:700;font-size:0.85rem;cursor:pointer;">Clear scores (keep groups &amp; players)</button>
+        <p style="font-size:0.78rem;color:#666;margin:0 0 4px;line-height:1.5;"><strong>Clear scores</strong> — wipes every score so far but keeps your people, groups, and handicaps exactly as they are. Use this to start a new round with the same roster.</p>
+        <button id="clearScoresBtn" style="background:var(--white);border:1px solid #c98a1e;color:#a06b12;border-radius:7px;padding:10px 16px;font-weight:700;font-size:0.85rem;cursor:pointer;">Clear scores (keep people &amp; groups)</button>
         <div id="clearScoresConfirmArea" style="margin-top:10px;"></div>
 
         <div style="height:1px;background:var(--grid);margin:18px 0;"></div>
 
-        <p style="font-size:0.78rem;color:#666;margin:0 0 4px;line-height:1.5;"><strong>Clear everything</strong> — wipes the course, every group, and every score. Archives the current session first so it can be restored later.</p>
+        <p style="font-size:0.78rem;color:#666;margin:0 0 4px;line-height:1.5;"><strong>Clear everything</strong> — wipes the course, every person, every group, and every score. Archives the current session first so it can be restored later.</p>
         <button id="clearBoardBtn" style="background:var(--white);border:1px solid var(--red);color:var(--red);border-radius:7px;padding:10px 16px;font-weight:700;font-size:0.85rem;cursor:pointer;">Clear everything (archive current session)</button>
         <div id="clearBoardConfirmArea" style="margin-top:10px;"></div>
         <div id="pastSessionsWrap" style="margin-top:16px;"></div>
@@ -387,8 +416,9 @@ let state = {
   startMode: 'shotgun', // 'shotgun' | 'standard'
   standardStartHole: 1,
   course: { holes: defaultHoles() },
-  groups: [], // {id, name, startHole, players:[{id,name,hcp,scores[18]}]}
-  archives: [] // {id, archivedAt, tournamentName, course, groups} — snapshots from "Clear board"
+  people: [], // master roster: {id,name,hcp,scores[18]}
+  groups: [], // {id,name,startHole,currentPos,playerIds:[personId...]}
+  archives: [] // snapshots from "Clear everything"
 };
 let unlockedGroupId = null;
 let adminUnlocked = false;
@@ -396,7 +426,55 @@ let dirty = false;
 let lastSavedJSON = '';
 
 function uid(){ return 'g_' + Math.random().toString(36).slice(2,9); }
+function personUid(){ return 'p_' + Math.random().toString(36).slice(2,9); }
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function normalizeScores(scores){
+  const out = Array(18).fill(null);
+  if(Array.isArray(scores)) for(let i=0;i<Math.min(18,scores.length);i++) out[i] = scores[i];
+  return out;
+}
+
+// Backward-compatible migration: older versions stored full player objects inside each group.
+// The new model stores each golfer once in state.people and groups only keep player IDs.
+function normalizeStateShape(){
+  if(!state || typeof state !== 'object') state = {};
+  if(!state.tournamentName) state.tournamentName = 'Family Cup';
+  if(!state.course || !Array.isArray(state.course.holes)) state.course = { holes: defaultHoles() };
+  if(!Array.isArray(state.groups)) state.groups = [];
+  if(!Array.isArray(state.archives)) state.archives = [];
+  if(!Array.isArray(state.people)) state.people = [];
+
+  const byId = new Map();
+  state.people = state.people.map(p=>{
+    const person = {
+      id: p.id || personUid(),
+      name: String(p.name || 'Player'),
+      hcp: Number(p.hcp)||0,
+      scores: normalizeScores(p.scores)
+    };
+    byId.set(person.id, person);
+    return person;
+  });
+
+  state.groups.forEach(g=>{
+    const ids = Array.isArray(g.playerIds) ? g.playerIds.slice() : [];
+    if(Array.isArray(g.players)){
+      g.players.forEach(oldP=>{
+        let id = oldP.id || personUid();
+        if(!byId.has(id)){
+          const person = { id, name:String(oldP.name||'Player'), hcp:Number(oldP.hcp)||0, scores:normalizeScores(oldP.scores) };
+          state.people.push(person);
+          byId.set(id, person);
+        }
+        if(!ids.includes(id)) ids.push(id);
+      });
+    }
+    g.playerIds = [...new Set(ids)].filter(id=>byId.has(id));
+    delete g.players;
+    if(typeof g.currentPos !== 'number') g.currentPos = 0;
+  });
+}
 
 function holeOrder(g){
   const start = g.startHole || 1;
@@ -425,35 +503,53 @@ function playerStats(p){
   return { gross, thru, parPlayed, strokesGiven, netToPar };
 }
 function fmtToPar(n){ if(n===0) return 'E'; return n>0 ? ('+'+n) : String(n); }
+function findPerson(id){ return state.people.find(p=>p.id===id); }
+function findGroup(id){ return state.groups.find(g=>g.id===id); }
+function groupPlayers(g){ return (g.playerIds || []).map(findPerson).filter(Boolean); }
+function groupForPlayer(playerId){ return state.groups.find(g=>(g.playerIds||[]).includes(playerId)) || null; }
 function groupPos(g){
-  if(typeof g.currentPos === 'number') return g.currentPos;
+  if(typeof g.currentPos === 'number' && g.currentPos > 0) return g.currentPos;
+  const players = groupPlayers(g);
   const order = holeOrder(g);
   for(let pos=0; pos<18; pos++){
     const idx = order[pos]-1;
-    const allFilled = g.players.length>0 && g.players.every(p => p.scores[idx]!==null && p.scores[idx]!==undefined && p.scores[idx]!=='');
+    const allFilled = players.length>0 && players.every(p => p.scores[idx]!==null && p.scores[idx]!==undefined && p.scores[idx]!=='');
     if(!allFilled) return pos;
   }
   return 18;
 }
-function allPlayersFlat(){ const out=[]; state.groups.forEach(g=>g.players.forEach(p=>out.push({p,g}))); return out; }
-
+function allPlayersFlat(){ return state.people.map(p=>({p, g:groupForPlayer(p.id)})); }
+function liveRowSort(a,b){
+  const aStarted = a.s ? a.s.thru>0 : a.thru>0;
+  const bStarted = b.s ? b.s.thru>0 : b.thru>0;
+  if(aStarted !== bStarted) return bStarted - aStarted;
+  if(!aStarted && !bStarted){
+    const an = a.p ? a.p.name : a.g.name;
+    const bn = b.p ? b.p.name : b.g.name;
+    return an.localeCompare(bn);
+  }
+  const aNet = a.s ? a.s.netToPar : a.netToPar;
+  const bNet = b.s ? b.s.netToPar : b.netToPar;
+  const aThru = a.s ? a.s.thru : a.thru;
+  const bThru = b.s ? b.s.thru : b.thru;
+  return aNet - bNet || bThru - aThru;
+}
 function computeRanks(){
-  const rows = allPlayersFlat().map(({p,g}) => ({ p, s: playerStats(p) }));
-  rows.sort((a,b)=> a.s.netToPar - b.s.netToPar || b.s.thru - a.s.thru);
+  const rows = allPlayersFlat().map(({p,g}) => ({ p, g, s: playerStats(p) }));
+  rows.sort(liveRowSort);
   const ranks = new Map();
   rows.forEach((r, idx) => ranks.set(r.p.id, idx+1));
   return ranks;
 }
-function findGroup(id){ return state.groups.find(g=>g.id===id); }
 
 /* ---------- Leaderboard ---------- */
 function renderLeaderboard(){
   const wrap = document.getElementById('boardWrap');
   const rows = allPlayersFlat().map(({p,g}) => ({ p, g, s: playerStats(p) }));
-  rows.sort((a,b)=> a.s.netToPar - b.s.netToPar || b.s.thru - a.s.thru);
+  rows.sort(liveRowSort);
 
   if(rows.length === 0){
-    wrap.innerHTML = '<div class="empty-board">No players yet — set the roster up in Admin.</div>';
+    wrap.innerHTML = '<div class="empty-board">No people yet — add the roster in Admin.</div>';
     return;
   }
   let thead = '<thead><tr>';
@@ -472,20 +568,17 @@ function renderLeaderboard(){
     const netCls = r.s.netToPar<0 ? 'under' : (r.s.netToPar>0 ? 'over' : 'even');
     tbody += '<tr>';
     tbody += `<td class="rank-col">${idx+1}</td>`;
-    tbody += `<td class="player-col"><span class="pn">${escapeHtml(r.p.name)}${isLeader?' 🏆':''}</span><span class="gtag">${escapeHtml(r.g.name)}</span></td>`;
+    tbody += `<td class="player-col"><span class="pn">${escapeHtml(r.p.name)}${isLeader?' 🏆':''}</span><span class="gtag">${escapeHtml(r.g ? r.g.name : 'Unassigned')}</span></td>`;
     for(let i=0;i<18;i++){
       const v = r.p.scores[i];
       const has = v!==null && v!==undefined && v!=='';
       let scoreCls = 'empty';
-      let shapeCls = '';
       if(has){
         const par = state.course.holes[i].par;
         const diff = v - par;
         scoreCls = diff<0 ? 'under' : (diff>0 ? 'over' : 'even');
-        if(diff <= -1) shapeCls = 'mark-circle';
-        else if(diff === 1 || diff === 2) shapeCls = 'mark-square';
       }
-      const inner = has ? (shapeCls ? `<span class="${shapeCls}">${v}</span>` : v) : '·';
+      const inner = has ? v : '·';
       tbody += `<td class="score-cell ${scoreCls} ${i===8?'hole9end':''}">${inner}</td>`;
     }
     tbody += `<td class="thru-col">${state.startMode !== 'standard' ? (r.s.thru + '/18') : r.s.thru}</td>`;
@@ -511,7 +604,7 @@ function renderBestBall(){
     for(let i=0;i<18;i++){
       const holeInfo = state.course.holes[i];
       let best = null;
-      g.players.forEach(p=>{
+      groupPlayers(g).forEach(p=>{
         const v = p.scores[i];
         if(v===null || v===undefined || v==='') return;
         const net = Number(v) - strokesReceived(p.hcp, holeInfo.si);
@@ -530,7 +623,7 @@ function renderBestBall(){
     return { g, holeBest, thru, netToPar };
   });
 
-  groupRows.sort((a,b)=> a.netToPar - b.netToPar || b.thru - a.thru);
+  groupRows.sort(liveRowSort);
 
   let thead = '<thead><tr>';
   thead += '<th class="rank-col stacked" rowspan="2">RANK</th>';
@@ -548,7 +641,8 @@ function renderBestBall(){
     const netCls = r.netToPar<0 ? 'under' : (r.netToPar>0 ? 'over' : 'even');
     tbody += '<tr>';
     tbody += `<td class="rank-col">${idx+1}</td>`;
-    tbody += `<td class="player-col"><span class="pn">${escapeHtml(r.g.name)}${isLeader?' 🏆':''}</span><span class="gtag">${escapeHtml(r.g.players.map(p=>p.name).join(', '))}</span></td>`;
+    const rosterNames = groupPlayers(r.g).map(p=>p.name).join(', ') || 'No players assigned';
+    tbody += `<td class="player-col"><span class="pn">${escapeHtml(r.g.name)}${isLeader?' 🏆':''}</span><span class="gtag">${escapeHtml(rosterNames)}</span></td>`;
     for(let i=0;i<18;i++){
       const b = r.holeBest[i];
       if(!b){
@@ -638,7 +732,7 @@ function renderLockArea(){
   }
 
   let picks = state.groups.map(g => {
-    const roster = g.players.map(p=>p.name).join(', ') || 'No players yet';
+    const roster = groupPlayers(g).map(p=>p.name).join(', ') || 'No players yet';
     return `<button data-id="${g.id}"><span class="gpick-name">${escapeHtml(g.name)}</span><span class="gpick-roster">${escapeHtml(roster)}</span></button>`;
   }).join('');
   wrap.innerHTML = `
@@ -721,7 +815,8 @@ function renderLog(){
     renderLog();
   };
 
-  if(g.players.length===0){
+  const activePlayers = groupPlayers(g);
+  if(activePlayers.length===0){
     area.innerHTML = bar + '<div class="no-player">No players are on this group\'s roster yet — add them in the Admin tab.</div>';
     document.getElementById('lockOutBtn').addEventListener('click', doSwitchOut);
     return;
@@ -756,7 +851,7 @@ function renderLog(){
   const holeInfo = state.course.holes[holeIdx];
   const ranks = computeRanks();
 
-  let rows = g.players.map(p=>{
+  let rows = activePlayers.map(p=>{
     const existing = p.scores[holeIdx];
     if(holeDrafts[p.id] === undefined){
       holeDrafts[p.id] = (existing!==null && existing!==undefined && existing!=='') ? Number(existing) : holeInfo.par;
@@ -805,7 +900,7 @@ function renderLog(){
     });
   });
   document.getElementById('saveNext').addEventListener('click', ()=>{
-    g.players.forEach(p=>{ p.scores[holeIdx] = holeDrafts[p.id] !== undefined ? holeDrafts[p.id] : holeInfo.par; });
+    activePlayers.forEach(p=>{ p.scores[holeIdx] = holeDrafts[p.id] !== undefined ? holeDrafts[p.id] : holeInfo.par; });
     if(!isEditing) g.currentPos = pos + 1;
     editingHolePos = null;
     holeDrafts = {};
@@ -867,125 +962,248 @@ function renderScorecardGrid(){
   }
 }
 
-let editingGroupId = null; // group whose name is being edited inline
-let editingPlayerId = null; // player whose name/hcp is being edited inline
+let adminRosterTab = 'people'; // 'people' | 'groups'
+let editingPersonId = null;
+let groupBuilder = null; // { id:null|string, name:string, playerIds:string[], includeFifth:boolean }
+let adminGroupSavedMessage = '';
 
-function renderAdminGroupList(){
-  const wrap = document.getElementById('adminGroupList');
-  if(!wrap) return;
-  if(state.groups.length===0){ wrap.innerHTML = '<div style="font-size:0.82rem;color:#888;">No groups yet — add one above.</div>'; return; }
-  wrap.innerHTML = state.groups.map(g=>{
-    const rows = g.players.map(p=>{
-      const s = playerStats(p);
-      if(editingPlayerId === p.id){
-        return `<div class="manage-row manage-row-editing">
-          <input class="edit-name" data-gid="${g.id}" data-pid="${p.id}" value="${escapeHtml(p.name)}" placeholder="Name">
-          <input class="edit-hcp" data-gid="${g.id}" data-pid="${p.id}" value="${p.hcp||0}" type="number" inputmode="numeric" placeholder="Hcp">
-          <button class="save-player-edit" data-gid="${g.id}" data-pid="${p.id}">Save</button>
-          <button class="cancel-player-edit">Cancel</button>
-        </div>`;
-      }
-      return `<div class="manage-row"><span>${escapeHtml(p.name)} · Hcp ${p.hcp||0} · ${s.thru}/18</span>
-        <span class="row-actions">
-          <button class="edit-player" data-pid="${p.id}">Edit</button>
-          <button class="del-player" data-gid="${g.id}" data-pid="${p.id}">Remove</button>
-        </span>
+function setAdminRosterTab(tab){
+  adminRosterTab = tab;
+  renderAdminRosterTabs();
+}
+
+function renderAdminRosterTabs(){
+  const peopleBtn = document.getElementById('adminPeopleTabBtn');
+  const groupsBtn = document.getElementById('adminGroupsTabBtn');
+  const peoplePanel = document.getElementById('adminPeoplePanel');
+  const groupsPanel = document.getElementById('adminGroupsPanel');
+  if(!peopleBtn) return;
+  peopleBtn.classList.toggle('active', adminRosterTab==='people');
+  groupsBtn.classList.toggle('active', adminRosterTab==='groups');
+  peoplePanel.style.display = adminRosterTab==='people' ? 'block' : 'none';
+  groupsPanel.style.display = adminRosterTab==='groups' ? 'block' : 'none';
+  peopleBtn.onclick = ()=>setAdminRosterTab('people');
+  groupsBtn.onclick = ()=>setAdminRosterTab('groups');
+  renderAdminPeopleList();
+  renderAdminGroupList();
+  renderGroupBuilder();
+}
+
+function renderAdminPeopleList(){
+  const wrap = document.getElementById('adminPersonList');
+  const addBtn = document.getElementById('adminAddPersonBtn');
+  if(!wrap || !addBtn) return;
+
+  const addPerson = ()=>{
+    const nameInp = document.getElementById('adminPersonName');
+    const hcpInp = document.getElementById('adminPersonHcp');
+    const err = document.getElementById('adminPersonError');
+    const name = nameInp.value.trim();
+    if(!name){ err.textContent = 'Enter a player name.'; return; }
+    if(state.people.some(p=>p.name.trim().toLowerCase()===name.toLowerCase())){
+      err.textContent = 'That person is already on the roster.';
+      return;
+    }
+    err.textContent = '';
+    state.people.push({ id:personUid(), name, hcp:Number(hcpInp.value)||0, scores:Array(18).fill(null) });
+    nameInp.value=''; hcpInp.value='';
+    saveSoon(); renderAll();
+  };
+  addBtn.onclick = addPerson;
+  document.getElementById('adminPersonName').onkeydown = e=>{ if(e.key==='Enter') addPerson(); };
+  document.getElementById('adminPersonHcp').onkeydown = e=>{ if(e.key==='Enter') addPerson(); };
+
+  if(state.people.length===0){
+    wrap.innerHTML = '<div style="font-size:0.82rem;color:#888;">No people yet — add your tournament roster above.</div>';
+    return;
+  }
+
+  wrap.innerHTML = state.people.map(p=>{
+    const assigned = groupForPlayer(p.id);
+    if(editingPersonId===p.id){
+      return `<div class="manage-row manage-row-editing">
+        <input class="edit-person-name" data-pid="${p.id}" value="${escapeHtml(p.name)}" placeholder="Name">
+        <input class="edit-person-hcp" data-pid="${p.id}" value="${p.hcp||0}" type="number" inputmode="numeric" placeholder="Hcp" style="width:62px;">
+        <button class="save-person-edit" data-pid="${p.id}">Save</button>
+        <button class="cancel-person-edit">Cancel</button>
       </div>`;
-    }).join('') || '<div class="manage-row"><span style="opacity:0.5;">No players yet</span></div>';
-
-    const headName = editingGroupId === g.id
-      ? `<div class="new-group-row" style="margin-bottom:0;">
-           <input class="edit-group-name" data-gid="${g.id}" value="${escapeHtml(g.name)}" style="flex:1;min-width:100px;">
-           <button class="save-group-edit" data-gid="${g.id}">Save</button>
-           <button class="cancel-group-edit">Cancel</button>
-         </div>`
-      : `<div class="gn">${escapeHtml(g.name)} <button class="edit-group" data-gid="${g.id}" style="background:none;border:none;color:#888;font-size:0.7rem;cursor:pointer;text-decoration:underline;">Edit</button><small>${g.startHole ? 'Starts hole '+g.startHole : 'Start hole not set yet'}</small></div>`;
-
-    return `<div class="group-block">
-      <div class="group-block-head">
-        ${headName}
-        <button class="del-group" data-gid="${g.id}">Remove group</button>
-      </div>
-      ${rows}
-      <div class="add-row" style="margin-top:8px;">
-        <input class="name" data-gid="${g.id}" placeholder="Add player">
-        <input class="hcp" data-gid="${g.id}" placeholder="Hcp" type="number" inputmode="numeric">
-        <button class="add-player-btn" data-gid="${g.id}">Add</button>
-      </div>
+    }
+    return `<div class="manage-row">
+      <span>${escapeHtml(p.name)} · Hcp ${p.hcp||0}<span class="person-assignment">${assigned ? escapeHtml(assigned.name) : 'Unassigned'}</span></span>
+      <span class="row-actions">
+        <button class="edit-person" data-pid="${p.id}">Edit</button>
+        <button class="del-person" data-pid="${p.id}">Remove</button>
+      </span>
     </div>`;
   }).join('');
 
-  wrap.querySelectorAll('.del-player').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const g = findGroup(btn.dataset.gid);
-      g.players = g.players.filter(p=>p.id!==btn.dataset.pid);
+  wrap.querySelectorAll('.edit-person').forEach(btn=>btn.onclick=()=>{ editingPersonId=btn.dataset.pid; renderAdminPeopleList(); });
+  wrap.querySelectorAll('.cancel-person-edit').forEach(btn=>btn.onclick=()=>{ editingPersonId=null; renderAdminPeopleList(); });
+  wrap.querySelectorAll('.save-person-edit').forEach(btn=>btn.onclick=()=>{
+    const p = findPerson(btn.dataset.pid);
+    const nameInp = wrap.querySelector(`.edit-person-name[data-pid="${btn.dataset.pid}"]`);
+    const hcpInp = wrap.querySelector(`.edit-person-hcp[data-pid="${btn.dataset.pid}"]`);
+    const name = nameInp.value.trim();
+    if(!p || !name) return;
+    p.name = name;
+    p.hcp = Number(hcpInp.value)||0;
+    editingPersonId = null;
+    saveSoon(); renderAll();
+  });
+  wrap.querySelectorAll('.del-person').forEach(btn=>btn.onclick=()=>{
+    if(btn.dataset.armed==='1'){
+      const pid = btn.dataset.pid;
+      state.people = state.people.filter(p=>p.id!==pid);
+      state.groups.forEach(g=>{ g.playerIds = (g.playerIds||[]).filter(id=>id!==pid); });
+      if(groupBuilder) groupBuilder.playerIds = groupBuilder.playerIds.map(id=>id===pid?'':id);
       saveSoon(); renderAll();
-    });
+    } else {
+      btn.dataset.armed='1';
+      btn.textContent='Tap again';
+      btn.style.color='var(--red)';
+      clearTimeout(btn.__armTimer);
+      btn.__armTimer=setTimeout(()=>{ btn.dataset.armed=''; btn.textContent='Remove'; btn.style.color=''; },3000);
+    }
   });
-  wrap.querySelectorAll('.edit-player').forEach(btn=>{
-    btn.addEventListener('click', ()=>{ editingPlayerId = btn.dataset.pid; renderAdminGroupList(); });
+}
+
+function assignedPlayerIdsExcept(groupId){
+  const taken = new Set();
+  state.groups.forEach(g=>{
+    if(groupId && g.id===groupId) return;
+    (g.playerIds||[]).forEach(id=>taken.add(id));
   });
-  wrap.querySelectorAll('.cancel-player-edit').forEach(btn=>{
-    btn.addEventListener('click', ()=>{ editingPlayerId = null; renderAdminGroupList(); });
+  return taken;
+}
+
+function startGroupBuilder(group=null){
+  adminRosterTab = 'groups';
+  const existingIds = group ? (group.playerIds||[]).slice(0,5) : [];
+  while(existingIds.length<4) existingIds.push('');
+  groupBuilder = {
+    id: group ? group.id : null,
+    name: group ? group.name : '',
+    playerIds: existingIds,
+    includeFifth: existingIds.length>4 || (group && (group.playerIds||[]).length>4)
+  };
+  renderAdminRosterTabs();
+  const name = document.getElementById('groupBuilderName');
+  if(name) name.focus();
+}
+
+function renderGroupBuilder(){
+  const wrap = document.getElementById('adminGroupBuilder');
+  if(!wrap) return;
+  if(!groupBuilder){ wrap.innerHTML=''; return; }
+
+  const slots = groupBuilder.includeFifth ? 5 : 4;
+  while(groupBuilder.playerIds.length<slots) groupBuilder.playerIds.push('');
+  groupBuilder.playerIds = groupBuilder.playerIds.slice(0,slots);
+  const takenElsewhere = assignedPlayerIdsExcept(groupBuilder.id);
+
+  let selects = '';
+  for(let i=0;i<slots;i++){
+    const current = groupBuilder.playerIds[i] || '';
+    const selectedOtherSlots = new Set(groupBuilder.playerIds.filter((id,idx)=>idx!==i && id));
+    const available = state.people.filter(p=>!takenElsewhere.has(p.id) && (!selectedOtherSlots.has(p.id) || p.id===current));
+    const options = [`<option value="">Select person…</option>`].concat(available.map(p=>`<option value="${p.id}" ${p.id===current?'selected':''}>${escapeHtml(p.name)} · Hcp ${p.hcp||0}</option>`)).join('');
+    selects += `<label>Player ${i+1}</label><select class="group-player-select" data-slot="${i}">${options}</select>`;
+  }
+
+  wrap.innerHTML = `<div class="group-builder">
+    <label>Group name</label>
+    <input id="groupBuilderName" value="${escapeHtml(groupBuilder.name)}" placeholder="e.g. Group 1">
+    ${selects}
+    ${!groupBuilder.includeFifth ? '<button class="add-fifth" id="addFifthPlayerBtn">+ Add a 5th person</button>' : ''}
+    <div id="groupBuilderError" style="color:var(--red);font-size:0.75rem;margin-top:10px;"></div>
+    <div class="group-builder-actions">
+      <button class="cancel-group" id="cancelGroupBuilderBtn">Cancel</button>
+      <button class="save-group" id="saveGroupBuilderBtn">${groupBuilder.id?'Save group changes':'Save group'}</button>
+    </div>
+  </div>`;
+
+  document.getElementById('groupBuilderName').oninput = e=>{ groupBuilder.name=e.target.value; };
+  wrap.querySelectorAll('.group-player-select').forEach(sel=>{
+    sel.onchange = ()=>{
+      groupBuilder.playerIds[Number(sel.dataset.slot)] = sel.value;
+      renderGroupBuilder();
+    };
   });
-  wrap.querySelectorAll('.save-player-edit').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const g = findGroup(btn.dataset.gid);
-      const p = g.players.find(pp=>pp.id===btn.dataset.pid);
-      const nameInp = wrap.querySelector(`.edit-name[data-pid="${btn.dataset.pid}"]`);
-      const hcpInp = wrap.querySelector(`.edit-hcp[data-pid="${btn.dataset.pid}"]`);
-      const name = nameInp.value.trim();
-      if(!name) return;
-      p.name = name;
-      p.hcp = Number(hcpInp.value)||0;
-      editingPlayerId = null;
-      saveSoon(); renderAll();
-    });
-  });
-  wrap.querySelectorAll('.edit-group').forEach(btn=>{
-    btn.addEventListener('click', ()=>{ editingGroupId = btn.dataset.gid; renderAdminGroupList(); });
-  });
-  wrap.querySelectorAll('.cancel-group-edit').forEach(btn=>{
-    btn.addEventListener('click', ()=>{ editingGroupId = null; renderAdminGroupList(); });
-  });
-  wrap.querySelectorAll('.save-group-edit').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const g = findGroup(btn.dataset.gid);
-      const nameInp = wrap.querySelector(`.edit-group-name[data-gid="${btn.dataset.gid}"]`);
-      const name = nameInp.value.trim();
-      if(!name) return;
+  const fifthBtn = document.getElementById('addFifthPlayerBtn');
+  if(fifthBtn) fifthBtn.onclick=()=>{ groupBuilder.includeFifth=true; groupBuilder.playerIds.push(''); renderGroupBuilder(); };
+  document.getElementById('cancelGroupBuilderBtn').onclick=()=>{ groupBuilder=null; renderAdminRosterTabs(); };
+  document.getElementById('saveGroupBuilderBtn').onclick=async ()=>{
+    const err = document.getElementById('groupBuilderError');
+    const name = groupBuilder.name.trim();
+    const ids = groupBuilder.playerIds.filter(Boolean);
+    if(!name){ err.textContent='Enter a group name.'; return; }
+    if(ids.length===0){ err.textContent='Select at least one person for this group.'; return; }
+    if(new Set(ids).size!==ids.length){ err.textContent='A person can only appear once in a group.'; return; }
+    const nowTaken = assignedPlayerIdsExcept(groupBuilder.id);
+    if(ids.some(id=>nowTaken.has(id))){ err.textContent='One of those people was just assigned to another group. Choose again.'; renderGroupBuilder(); return; }
+
+    if(groupBuilder.id){
+      const g = findGroup(groupBuilder.id);
+      if(!g) return;
       g.name = name;
-      editingGroupId = null;
+      g.playerIds = ids;
+    } else {
+      state.groups.push({ id:uid(), name, startHole:null, currentPos:0, playerIds:ids });
+    }
+    groupBuilder = null;
+    adminGroupSavedMessage = 'Group saved ✓';
+    dirty = true;
+    await saveNow();
+    renderAll();
+    clearTimeout(window.__adminGroupSavedTimer);
+    window.__adminGroupSavedTimer=setTimeout(()=>{ adminGroupSavedMessage=''; const msg=document.getElementById('adminGroupSavedMsg'); if(msg) msg.textContent=''; },2500);
+  };
+}
+
+function renderAdminGroupList(){
+  const wrap = document.getElementById('adminGroupList');
+  const startBtn = document.getElementById('adminStartGroupBtn');
+  const savedMsg = document.getElementById('adminGroupSavedMsg');
+  if(!wrap || !startBtn) return;
+  startBtn.onclick=()=>startGroupBuilder();
+  if(savedMsg) savedMsg.textContent = adminGroupSavedMessage;
+
+  if(state.groups.length===0){
+    wrap.innerHTML = '<div style="font-size:0.82rem;color:#888;">No groups yet — add one when you are ready to set the pairings.</div>';
+    return;
+  }
+
+  wrap.innerHTML = state.groups.map(g=>{
+    const players = groupPlayers(g);
+    const roster = players.map(p=>`${escapeHtml(p.name)} (Hcp ${p.hcp||0})`).join(' · ') || 'No players assigned';
+    return `<div class="group-block">
+      <div class="group-block-head">
+        <div class="gn">${escapeHtml(g.name)}<small>${g.startHole ? 'Starts hole '+g.startHole+' · ' : ''}${players.length} player${players.length===1?'':'s'}</small></div>
+        <span style="display:flex;gap:6px;">
+          <button class="edit-group" data-gid="${g.id}">Edit</button>
+          <button class="del-group" data-gid="${g.id}">Remove group</button>
+        </span>
+      </div>
+      <div style="font-size:0.78rem;color:#666;line-height:1.45;">${roster}</div>
+    </div>`;
+  }).join('');
+
+  wrap.querySelectorAll('.edit-group').forEach(btn=>btn.onclick=()=>startGroupBuilder(findGroup(btn.dataset.gid)));
+  wrap.querySelectorAll('.del-group').forEach(btn=>btn.onclick=()=>{
+    if(btn.dataset.armed==='1'){
+      const gid=btn.dataset.gid;
+      state.groups = state.groups.filter(g=>g.id!==gid);
+      if(unlockedGroupId===gid){ unlockedGroupId=null; try{localStorage.removeItem(LS_GROUP_KEY);}catch(e){} }
+      if(groupBuilder && groupBuilder.id===gid) groupBuilder=null;
       saveSoon(); renderAll();
-    });
-  });
-  wrap.querySelectorAll('.del-group').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      if(btn.dataset.armed === '1'){
-        state.groups = state.groups.filter(g=>g.id!==btn.dataset.gid);
-        if(unlockedGroupId===btn.dataset.gid) unlockedGroupId=null;
-        saveSoon(); renderAll();
-      } else {
-        btn.dataset.armed = '1';
-        btn.textContent = 'Tap again to confirm';
-        btn.style.color = 'var(--red)';
-        btn.style.borderColor = 'var(--red)';
-        clearTimeout(btn.__armTimer);
-        btn.__armTimer = setTimeout(()=>{ btn.dataset.armed=''; btn.textContent='Remove group'; btn.style.color=''; btn.style.borderColor=''; }, 3000);
-      }
-    });
-  });
-  wrap.querySelectorAll('.add-player-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const gid = btn.dataset.gid;
-      const g = findGroup(gid);
-      const nameInp = wrap.querySelector(`.name[data-gid="${gid}"]`);
-      const hcpInp = wrap.querySelector(`.hcp[data-gid="${gid}"]`);
-      const name = nameInp.value.trim();
-      if(!name) return;
-      g.players.push({ id: uid(), name, hcp: Number(hcpInp.value)||0, scores: Array(18).fill(null) });
-      saveSoon(); renderAll();
-    });
+    } else {
+      btn.dataset.armed='1';
+      btn.textContent='Tap again to confirm';
+      btn.style.color='var(--red)';
+      btn.style.borderColor='var(--red)';
+      clearTimeout(btn.__armTimer);
+      btn.__armTimer=setTimeout(()=>{ btn.dataset.armed=''; btn.textContent='Remove group'; btn.style.color=''; btn.style.borderColor=''; },3000);
+    }
   });
 }
 
@@ -1067,6 +1285,7 @@ function renderSessionControls(){
       archivedAt: new Date().toISOString(),
       tournamentName: state.tournamentName,
       course: JSON.parse(JSON.stringify(state.course)),
+      people: JSON.parse(JSON.stringify(state.people)),
       groups: JSON.parse(JSON.stringify(state.groups))
     };
     if(!state.archives) state.archives = [];
@@ -1085,8 +1304,8 @@ function renderSessionControls(){
     state.groups.forEach(g=>{
       g.currentPos = 0;
       g.startHole = null;
-      g.players.forEach(p=>{ p.scores = Array(18).fill(null); });
     });
+    state.people.forEach(p=>{ p.scores = Array(18).fill(null); });
     forgetDeviceState();
     scoresConfirmArea.innerHTML = '';
     saveSoon(); renderAll();
@@ -1094,6 +1313,7 @@ function renderSessionControls(){
 
   function doClearEverything(){
     archiveSnapshot();
+    state.people = [];
     state.groups = [];
     state.course = { holes: defaultHoles() };
     forgetDeviceState();
@@ -1104,7 +1324,7 @@ function renderSessionControls(){
   scoresBtn.onclick = ()=>{
     scoresConfirmArea.innerHTML = `
       <div style="border:1px solid #c98a1e;border-radius:8px;padding:12px;background:#fff9ef;">
-        <p style="font-size:0.8rem;color:#8a5c0e;margin:0 0 10px;line-height:1.4;">This wipes every score for every group (safely archived first) but keeps all your groups, players, and handicaps. Enter the admin PIN to confirm.</p>
+        <p style="font-size:0.8rem;color:#8a5c0e;margin:0 0 10px;line-height:1.4;">This wipes every score (safely archived first) but keeps all your people, groups, and handicaps. Enter the admin PIN to confirm.</p>
         <div class="new-group-row">
           <input type="password" inputmode="numeric" id="clearScoresPin" placeholder="Admin PIN" style="width:140px;">
           <button id="clearScoresConfirmBtn" style="background:#c98a1e;">Confirm clear</button>
@@ -1133,7 +1353,7 @@ function renderSessionControls(){
   clearBtn.onclick = ()=>{
     confirmArea.innerHTML = `
       <div style="border:1px solid var(--red);border-radius:8px;padding:12px;background:#fff5f5;">
-        <p style="font-size:0.8rem;color:#a11;margin:0 0 10px;line-height:1.4;">This clears every group and score currently live (safely archived first — nothing is deleted for good). Enter the admin PIN to confirm.</p>
+        <p style="font-size:0.8rem;color:#a11;margin:0 0 10px;line-height:1.4;">This clears every person, group, and score currently live (safely archived first — nothing is deleted for good). Enter the admin PIN to confirm.</p>
         <div class="new-group-row">
           <input type="password" inputmode="numeric" id="clearBoardPin" placeholder="Admin PIN" style="width:140px;">
           <button id="clearBoardConfirmBtn" style="background:var(--red);">Confirm clear</button>
@@ -1184,6 +1404,7 @@ function renderSessionControls(){
           archivedAt: new Date().toISOString(),
           tournamentName: state.tournamentName,
           course: JSON.parse(JSON.stringify(state.course)),
+          people: JSON.parse(JSON.stringify(state.people)),
           groups: JSON.parse(JSON.stringify(state.groups))
         };
         state.archives.splice(idx,1);
@@ -1191,7 +1412,9 @@ function renderSessionControls(){
         if(state.archives.length > 10) state.archives = state.archives.slice(0,10);
         state.tournamentName = snap.tournamentName;
         state.course = snap.course;
-        state.groups = snap.groups;
+        state.people = JSON.parse(JSON.stringify(snap.people || []));
+        state.groups = JSON.parse(JSON.stringify(snap.groups || []));
+        normalizeStateShape();
         unlockedGroupId = null;
         try{ localStorage.removeItem(LS_GROUP_KEY); }catch(e){}
         try{ localStorage.removeItem(LS_DEVICE_LOGGED_KEY); }catch(e){}
@@ -1212,21 +1435,11 @@ function renderAdmin(){
     renderTournamentSettings();
     renderRoundFormat();
     renderScorecardGrid();
-    renderAdminGroupList();
+    renderAdminRosterTabs();
     renderSessionControls();
   }
 }
 
-document.getElementById('adminAddGroupBtn').addEventListener('click', ()=>{
-  const nameInp = document.getElementById('adminGroupName');
-  const errEl = document.getElementById('adminGroupError');
-  const name = nameInp.value.trim();
-  if(!name){ errEl.textContent = 'Enter a group name.'; return; }
-  errEl.textContent = '';
-  state.groups.push({ id: uid(), name, startHole: null, players: [] });
-  nameInp.value='';
-  saveSoon(); renderAll();
-});
 
 /* ---------- Global render ---------- */
 function renderAll(){
@@ -1259,7 +1472,7 @@ async function loadInitial(){
   try{
     const { data, error } = await sb.from('tournament_state').select('data').eq('id', ROW_ID).single();
     if(error) throw error;
-    if(data && data.data){ state = data.data; if(!state.course) state.course={holes:defaultHoles()}; lastSavedJSON = JSON.stringify(state); }
+    if(data && data.data){ state = data.data; normalizeStateShape(); lastSavedJSON = JSON.stringify(state); }
     setSyncLabel('live', false);
   }catch(err){ console.error('load failed', err); setSyncLabel('setup needed — see console', true); }
 }
@@ -1269,6 +1482,7 @@ function subscribeRealtime(){
     .on('postgres_changes', { event: '*', schema: 'public', table: 'tournament_state', filter: `id=eq.${ROW_ID}` }, payload => {
       if(payload.new && payload.new.data && !dirty){
         state = payload.new.data;
+        normalizeStateShape();
         lastSavedJSON = JSON.stringify(state);
         renderAll();
         setSyncLabel('live update', false);
@@ -1315,6 +1529,7 @@ document.getElementById('toggleBestBallBtn').addEventListener('click', ()=>showB
 /* ---------- Init ---------- */
 (async function init(){
   await loadInitial();
+  normalizeStateShape();
   try{
     const savedId = localStorage.getItem(LS_GROUP_KEY);
     if(savedId && findGroup(savedId)) unlockedGroupId = savedId;
